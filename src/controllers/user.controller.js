@@ -1,4 +1,4 @@
-import asyncHandler from "../utils/asnycHandler.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apierror.js";
 import { User } from "../models/user.models.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
@@ -27,7 +27,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
     
-    user.refreshToken = refreshToken;
+    user.accountInfo.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
     
     return { accessToken, refreshToken };
@@ -36,7 +36,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
   }
 };
 
-const registerUser = asyncHandler(async (req, res) => {
+const registerUser = asyncHandler (async (req, res) => {
   const expectedFields = {
     personal: ['title', 'firstName', 'lastName', 'professionalEmail', 'phone', 'dateOfBirth', 'gender'],
     professional: ['specialty', 'subSpecialty', 'licenseNumber', 'licenseState', 'licenseExpiryDate', 'yearsOfExperience', 'medicalSchool', 'graduationYear'],
@@ -195,30 +195,46 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
-  const expectedFields = {
-    personal: ['professionalEmail'],
-    account: ['password']
-  };
+  // FIX 1: Handle both direct fields and nested structure
+  const { professionalEmail, password } = req.body;
   
-  const userData = extractFields(req.body, expectedFields);
-
-  if (!userData.personal.professionalEmail) {
+  // Log the incoming request for debugging
+  console.log('Login attempt:', { professionalEmail, hasPassword: !!password });
+  
+  if (!professionalEmail?.trim()) {
     throw new ApiError(400, "Professional email is required");
   }
 
-  if (!userData.account.password) {
+  if (!password?.trim()) {
     throw new ApiError(400, "Password is required");
   }
 
-  const user = await User.findOne({
-    'personalInfo.professionalEmail': userData.personal.professionalEmail
-  });
+  // FIX 2: Add debugging to see what we're searching for
+  console.log('Searching for user with email:', professionalEmail);
 
+  const user = await User.findOne({
+    'personalInfo.professionalEmail': professionalEmail.toLowerCase().trim()
+  }).select('+accountInfo.password');
+
+  // FIX 3: Add debugging to see if user was found
+  console.log('User found:', !!user);
+  
   if (!user) {
-    throw new ApiError(404, "User not found");
+    // FIX 4: Add more debugging info
+    const userCount = await User.countDocuments();
+    console.log('Total users in database:', userCount);
+    
+    // Check if user exists with different email format
+    const emailVariations = await User.find({
+      'personalInfo.professionalEmail': { $regex: professionalEmail.split('@')[0], $options: 'i' }
+    }, { 'personalInfo.professionalEmail': 1 });
+    
+    console.log('Similar emails found:', emailVariations);
+    
+    throw new ApiError(404, "User not found. Please check your email address.");
   }
 
-  const isPasswordValid = await user.isPasswordCorrect(userData.account.password);
+  const isPasswordValid = await user.isPasswordCorrect(password);
   if (!isPasswordValid) {
     throw new ApiError(401, "Invalid user credentials");
   }
@@ -229,7 +245,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const options = {
     httpOnly: true,
-    secure: true
+    secure: process.env.NODE_ENV === 'production' // Only secure in production
   };
 
   return res.status(200)
@@ -249,7 +265,7 @@ const logoutUser = asyncHandler(async(req, res) => {
         req.user._id,
         {
             $unset: {
-                refreshToken: 1 // this removes the field from document
+                "accountInfo.refreshToken": 1
             }
         },
         {
@@ -259,7 +275,7 @@ const logoutUser = asyncHandler(async(req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: process.env.NODE_ENV === 'production'
     }
 
     return res
@@ -269,8 +285,26 @@ const logoutUser = asyncHandler(async(req, res) => {
     .json(new ApiResponse(200, {}, "User logged Out"))
 })
 
+// FIX 5: Add a helper function to check database connection and users
+const debugDatabase = asyncHandler(async (req, res) => {
+  try {
+    const userCount = await User.countDocuments();
+    const sampleUsers = await User.find({}, { 'personalInfo.professionalEmail': 1 }).limit(5);
+    
+    return res.status(200).json(
+      new ApiResponse(200, {
+        totalUsers: userCount,
+        sampleEmails: sampleUsers.map(u => u.personalInfo.professionalEmail)
+      }, "Database debug info")
+    );
+  } catch (error) {
+    throw new ApiError(500, "Database connection error");
+  }
+});
+
 export {
   registerUser,
-  loginUser
-  
+  loginUser,
+  logoutUser,
+  debugDatabase
 };

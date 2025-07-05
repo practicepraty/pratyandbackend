@@ -48,16 +48,9 @@ const UserSchema = new mongoose.Schema({
       }
     },
     dateOfBirth: {
-      type: Date,
+  type:String,
       required: [true, 'Date of birth is required'],
-      validate: {
-        validator: function(v) {
-          const age = (new Date() - v) / (1000 * 60 * 60 * 24 * 365);
-          return age >= 18 && age <= 100;
-        },
-        message: 'Age must be between 18 and 100 years'
-      }
-    },
+},
     gender: {
       type: String,
       required: [true, 'Gender is required'],
@@ -101,14 +94,8 @@ const UserSchema = new mongoose.Schema({
       trim: true
     },
     licenseExpiryDate: {
-      type: Date,
-      validate: {
-        validator: function(v) {
-          return !v || v > new Date();
-        },
-        message: 'License expiry date must be in the future'
-      }
-    },
+  type: Date,
+},
     yearsOfExperience: {
       type: String,
       required: [true, 'Years of experience is required'],
@@ -183,18 +170,13 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: [true, 'ZIP code is required'],
         trim: true,
-        validate: {
-          validator: function(v) {
-            return /^\d{5}(-\d{4})?$/.test(v) || /^[A-Z]\d[A-Z] \d[A-Z]\d$/.test(v);
-          },
-          message: 'Please provide a valid ZIP/Postal code'
-        }
+
       },
       country: {
         type: String,
         required: [true, 'Country is required'],
         trim: true,
-        default: 'US'
+        default: 'IN' // Default to India
       },
       coordinates: {
         latitude: Number,
@@ -239,14 +221,14 @@ const UserSchema = new mongoose.Schema({
 })
 
 UserSchema.pre("save", async function (next) {
-    if(!this.isModified("password")) return next();
+    if(!this.isModified("accountInfo.password")) return next(); // Fixed: correct path
 
-    this.password = await bcrypt.hash(this.password, 10)
+    this.accountInfo.password = await bcrypt.hash(this.accountInfo.password, 10) // Fixed: correct path
     next()
 })
 
 UserSchema.methods.isPasswordCorrect = async function(password){
-    return await bcrypt.compare(password, this.password)
+    return await bcrypt.compare(password, this.accountInfo.password) // Fixed: correct path
 }
 
 UserSchema.methods.generateAccessToken = function(){
