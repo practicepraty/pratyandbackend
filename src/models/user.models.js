@@ -148,7 +148,7 @@ const UserSchema = new mongoose.Schema({
       type: String,
       required: [true, 'Institution name is required'],
       trim: true,
-      maxlength: [200, 'Institution name cannot exceed 200 characters']
+      maxlength: [201, 'Institution name cannot exceed 200 characters']
     },
     address: {
       street: {
