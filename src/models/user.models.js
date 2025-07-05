@@ -1,6 +1,7 @@
 import mongoose from "mongoose"
-import bcrypt from "bcrypt" // or "bcrypt"
+import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+import crypto from "crypto"
 
 const UserSchema = new mongoose.Schema({
 
@@ -204,17 +205,32 @@ const UserSchema = new mongoose.Schema({
 
   // Account Information
   accountInfo: {
-    password: {
-      type: String,
-      required: [true, 'Password is required'],
-      minlength: [8, 'Password must be at least 8 characters'],
-      select: false // Don't include password in queries by default
-    },
-    refreshToken: {
-      type: String,
-    }
+  password: {
+    type: String,
+    required: [true, 'Password is required'],
+    minlength: [8, 'Password must be at least 8 characters'],
+    select: false
+  },
+  refreshToken: {
+    type: String,
+  },
+  // ADD THESE NEW FIELDS FOR PASSWORD RECOVERY
+  passwordResetToken: {
+    type: String,
+    select: false
+  },
+  passwordResetExpires: {
+    type: Date,
+    select: false
+  },
+  passwordResetUsed: {
+    type: Boolean,
+    default: false,
+    select: false
   }
-}, {
+}
+},
+{
   timestamps: true,
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
@@ -226,6 +242,39 @@ UserSchema.pre("save", async function (next) {
     this.accountInfo.password = await bcrypt.hash(this.accountInfo.password, 10) // Fixed: correct path
     next()
 })
+
+UserSchema.methods.generatePasswordResetToken = function() {
+  // Generate random token
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  
+  // Hash token and set to passwordResetToken field
+  this.accountInfo.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  
+  // Set expiry (15 minutes from now)
+  this.accountInfo.passwordResetExpires = Date.now() + 15 * 60 * 1000;
+  this.accountInfo.passwordResetUsed = false;
+  
+  // Return unhashed token (this will be sent via email)
+  return resetToken;
+};
+
+UserSchema.methods.verifyPasswordResetToken = function(token) {
+  // Hash the provided token
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+  
+  // Check if token matches and hasn't expired
+  return (
+    this.accountInfo.passwordResetToken === hashedToken &&
+    this.accountInfo.passwordResetExpires > Date.now() &&
+    !this.accountInfo.passwordResetUsed
+  );
+};
 
 UserSchema.methods.isPasswordCorrect = async function(password){
     return await bcrypt.compare(password, this.accountInfo.password) // Fixed: correct path
