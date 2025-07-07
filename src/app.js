@@ -3,6 +3,7 @@ const app = express();
 
 import cors from "cors"
 import cookieParser from "cookie-parser"
+import { errorHandler } from "./middlewares/errorHandler.middleware.js";
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
@@ -22,4 +23,7 @@ import aiRouter from './routes/ai.routes.js'
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/ai", aiRouter)
 
-export {app} 
+// Global error handler (must be last)
+app.use(errorHandler);
+
+export {app}
