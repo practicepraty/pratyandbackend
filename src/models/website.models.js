@@ -1,384 +1,699 @@
 // src/models/website.models.js
-import mongoose, { Schema } from "mongoose";
+// src/models/website.models.js
+import mongoose from "mongoose";
 
-// Content section schema for reusable content blocks
-const contentSectionSchema = new Schema({
-    type: {
-        type: String,
-        required: true,
-        enum: ['hero', 'about', 'services', 'contact', 'testimonials', 'gallery']
-    },
-    title: {
-        type: String,
-        required: true
-    },
-    content: {
-        type: String,
-        required: true
-    },
-    order: {
-        type: Number,
-        default: 0
-    },
-    isVisible: {
-        type: Boolean,
-        default: true
-    },
-    metadata: {
-        type: Map,
-        of: Schema.Types.Mixed
-    }
+// Content Variation Schema (for A/B testing)
+const contentVariationSchema = new mongoose.Schema({
+  variationId: {
+    type: String,
+    required: true
+  },
+  focus: {
+    type: String,
+    enum: ['trust-experience', 'technology-innovation', 'patient-care', 'comprehensive-services', 'general', 'fallback'],
+    default: 'general'
+  },
+  content: {
+    type: mongoose.Schema.Types.Mixed,
+    required: true
+  },
+  qualityScore: {
+    type: Number,
+    min: 0,
+    max: 1,
+    default: 0.8
+  },
+  fallbackUsed: {
+    type: Boolean,
+    default: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
-// Service schema for medical services
-const serviceSchema = new Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    description: {
-        type: String,
-        required: true
-    },
-    icon: {
-        type: String,
-        default: "medical-icon"
-    },
-    isActive: {
-        type: Boolean,
-        default: true
-    },
-    order: {
-        type: Number,
-        default: 0
-    }
+// SEO Meta Schema
+const seoMetaSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+    maxlength: 60
+  },
+  description: {
+    type: String,
+    required: true,
+    maxlength: 160
+  },
+  keywords: [{
+    type: String,
+    trim: true
+  }],
+  canonicalUrl: String,
+  ogTitle: String,
+  ogDescription: String,
+  ogImage: String
 });
 
-// SEO metadata schema
-const seoMetaSchema = new Schema({
-    title: {
-        type: String,
-        required: true,
-        maxlength: 60
-    },
-    description: {
-        type: String,
-        required: true,
-        maxlength: 160
-    },
-    keywords: [{
-        type: String
-    }],
-    ogImage: {
-        type: String
-    },
-    canonicalUrl: {
-        type: String
-    }
+// Hero Section Schema
+const heroSectionSchema = new mongoose.Schema({
+  headline: {
+    type: String,
+    required: true,
+    maxlength: 200
+  },
+  subheadline: {
+    type: String,
+    maxlength: 300
+  },
+  ctaText: {
+    type: String,
+    maxlength: 50,
+    default: "Schedule Appointment"
+  },
+  backgroundImage: String,
+  backgroundColor: String
 });
 
-// Contact information schema
-const contactInfoSchema = new Schema({
-    phone: {
-        type: String,
-        required: true
-    },
-    email: {
-        type: String,
-        required: true
-    },
-    address: {
-        type: String,
-        required: true
-    },
-    hours: {
-        type: String,
-        required: true
-    },
-    website: {
-        type: String
-    },
-    socialMedia: {
-        facebook: String,
-        twitter: String,
-        instagram: String,
-        linkedin: String
-    }
+// About Section Schema
+const aboutSectionSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+    maxlength: 100
+  },
+  content: {
+    type: String,
+    required: true,
+    maxlength: 2000
+  },
+  highlights: [{
+    type: String,
+    maxlength: 100
+  }],
+  image: String,
+  videoUrl: String
 });
 
-// Main website schema
-const websiteSchema = new Schema({
-    // Basic Information
-    websiteTitle: {
-        type: String,
-        required: true,
-        trim: true
+// Service Schema
+const serviceSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    maxlength: 100
+  },
+  description: {
+    type: String,
+    required: true,
+    maxlength: 500
+  },
+  icon: {
+    type: String,
+    default: "medical-icon"
+  },
+  price: {
+    type: Number,
+    min: 0
+  },
+  duration: String,
+  isActive: {
+    type: Boolean,
+    default: true
+  }
+});
+
+// Contact Info Schema
+const contactInfoSchema = new mongoose.Schema({
+  phone: {
+    type: String,
+    required: true,
+    match: /^[\+]?[1-9][\d]{0,15}$/
+  },
+  email: {
+    type: String,
+    required: true,
+    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  },
+  address: {
+    type: String,
+    required: true,
+    maxlength: 200
+  },
+  city: String,
+  state: String,
+  zipCode: String,
+  country: {
+    type: String,
+    default: "United States"
+  },
+  hours: {
+    type: String,
+    default: "Monday-Friday: 9:00 AM - 5:00 PM"
+  },
+  website: String,
+  socialMedia: {
+    facebook: String,
+    twitter: String,
+    instagram: String,
+    linkedin: String
+  }
+});
+
+// Generation Metadata Schema
+const generationMetadataSchema = new mongoose.Schema({
+  aiModel: {
+    type: String,
+    required: true
+  },
+  processingTime: {
+    type: Number,
+    required: true
+  },
+  fallbackUsed: {
+    type: Boolean,
+    default: false
+  },
+  confidenceScore: {
+    type: Number,
+    min: 0,
+    max: 1,
+    default: 0.8
+  },
+  regeneratedAt: Date,
+  regenerationCount: {
+    type: Number,
+    default: 0
+  },
+  specialtyDetection: {
+    method: {
+      type: String,
+      enum: ['keyword', 'ai', 'hybrid', 'fallback'],
+      default: 'hybrid'
     },
-    tagline: {
-        type: String,
-        required: true,
-        trim: true
+    confidence: {
+      type: Number,
+      min: 0,
+      max: 1
     },
-    specialty: {
-        type: String,
-        required: true,
-        lowercase: true
+    alternativeSpecialties: [{
+      specialty: String,
+      confidence: Number
+    }]
+  }
+});
+
+// Customization Schema
+const customizationSchema = new mongoose.Schema({
+  theme: {
+    type: String,
+    enum: ['modern', 'classic', 'minimal', 'professional'],
+    default: 'professional'
+  },
+  colorScheme: {
+    primary: {
+      type: String,
+      default: "#2563eb"
     },
-    
-    // Content Sections
-    heroSection: {
-        headline: {
-            type: String,
-            required: true
-        },
-        subheadline: {
-            type: String,
-            required: true
-        },
-        ctaText: {
-            type: String,
-            default: "Schedule Appointment"
-        },
-        backgroundImage: {
-            type: String
-        }
+    secondary: {
+      type: String,
+      default: "#64748b"
     },
-    
-    aboutSection: {
-        title: {
-            type: String,
-            required: true
-        },
-        content: {
-            type: String,
-            required: true
-        },
-        highlights: [{
-            type: String
-        }],
-        image: {
-            type: String
-        }
+    accent: {
+      type: String,
+      default: "#10b981"
     },
-    
-    // Services
-    services: [serviceSchema],
-    
-    // Contact Information
-    contactInfo: contactInfoSchema,
-    
-    // SEO
-    seoMeta: seoMetaSchema,
-    
-    // Generation Details
-    originalTranscription: {
-        type: String,
-        required: true
-    },
-    
-    // User Association
-    userId: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-        required: true
-    },
-    
-    // Status and Metadata
-    status: {
-        type: String,
-        enum: ['draft', 'published', 'archived'],
-        default: 'draft'
-    },
-    
-    isActive: {
-        type: Boolean,
-        default: true
-    },
-    
-    // Customization
-    customizations: {
-        theme: {
-            primaryColor: {
-                type: String,
-                default: "#007bff"
-            },
-            secondaryColor: {
-                type: String,
-                default: "#6c757d"
-            },
-            fontFamily: {
-                type: String,
-                default: "Arial, sans-serif"
-            }
-        },
-        layout: {
-            header: {
-                type: String,
-                default: "default"
-            },
-            footer: {
-                type: String,
-                default: "default"
-            }
-        }
-    },
-    
-    // Generation Metadata
-    generationMetadata: {
-        aiModel: {
-            type: String,
-            default: "anthropic.claude-3-sonnet-20240229-v1:0"
-        },
-        processingTime: {
-            type: Number // in milliseconds
-        },
-        fallbackUsed: {
-            type: Boolean,
-            default: false
-        },
-        confidenceScore: {
-            type: Number,
-            min: 0,
-            max: 1
-        }
+    background: {
+      type: String,
+      default: "#ffffff"
     }
-    
+  },
+  typography: {
+    headingFont: {
+      type: String,
+      default: "Inter"
+    },
+    bodyFont: {
+      type: String,
+      default: "Inter"
+    },
+    fontSize: {
+      type: String,
+      enum: ['small', 'medium', 'large'],
+      default: 'medium'
+    }
+  },
+  layout: {
+    headerStyle: {
+      type: String,
+      enum: ['fixed', 'static', 'transparent'],
+      default: 'static'
+    },
+    footerStyle: {
+      type: String,
+      enum: ['simple', 'detailed', 'minimal'],
+      default: 'detailed'
+    },
+    sidebarEnabled: {
+      type: Boolean,
+      default: false
+    }
+  },
+  features: {
+    appointmentBooking: {
+      type: Boolean,
+      default: false
+    },
+    liveChat: {
+      type: Boolean,
+      default: false
+    },
+    testimonials: {
+      type: Boolean,
+      default: true
+    },
+    blog: {
+      type: Boolean,
+      default: false
+    },
+    newsletter: {
+      type: Boolean,
+      default: false
+    }
+  }
+});
+
+// Main Website Schema
+const websiteSchema = new mongoose.Schema({
+  // Basic Information
+  websiteTitle: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 100
+  },
+  tagline: {
+    type: String,
+    trim: true,
+    maxlength: 200
+  },
+  specialty: {
+    type: String,
+    required: true,
+    enum: [
+      'cardiology', 'orthopedics', 'dermatology', 'pediatrics', 
+      'gynecology', 'neurology', 'psychiatry', 'oncology', 
+      'ophthalmology', 'dentistry', 'urology', 'endocrinology', 
+      'general medicine'
+    ],
+    index: true
+  },
+  
+  // Content Sections
+  heroSection: {
+    type: heroSectionSchema,
+    required: true
+  },
+  aboutSection: {
+    type: aboutSectionSchema,
+    required: true
+  },
+  services: {
+    type: [serviceSchema],
+    validate: {
+      validator: function(services) {
+        return services.length >= 1 && services.length <= 10;
+      },
+      message: 'Services must contain between 1 and 10 items'
+    }
+  },
+  contactInfo: {
+    type: contactInfoSchema,
+    required: true
+  },
+  
+  // SEO and Marketing
+  seoMeta: {
+    type: seoMetaSchema,
+    required: true
+  },
+  
+  // Generation Data
+  originalTranscription: {
+    type: String,
+    required: true
+  },
+  generationMetadata: {
+    type: generationMetadataSchema,
+    required: true
+  },
+  
+  // Template Generation Fields
+  generatedHtml: {
+    type: String,
+    required: false
+  },
+  templateName: {
+    type: String,
+    required: false
+  },
+  lastGenerated: {
+    type: Date,
+    required: false
+  },
+  
+  // Customization
+  customizations: {
+    type: customizationSchema,
+    default: () => ({})
+  },
+  
+  // Content Variations
+  contentVariations: [contentVariationSchema],
+  
+  // User and Status
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true
+  },
+  status: {
+    type: String,
+    enum: ['draft', 'published', 'archived'],
+    default: 'draft',
+    index: true
+  },
+  
+  // Quality and Performance
+  qualityScore: {
+    type: Number,
+    min: 0,
+    max: 1,
+    default: 0.8
+  },
+  contentFeatures: [{
+    type: String,
+    enum: [
+      'comprehensive-services', 'detailed-highlights', 'seo-optimized',
+      'compelling-hero', 'professional-fallback', 'template-based'
+    ]
+  }],
+  
+  // Versioning
+  version: {
+    type: Number,
+    default: 1
+  },
+  previousVersions: [{
+    version: Number,
+    content: mongoose.Schema.Types.Mixed,
+    createdAt: Date
+  }],
+  
+  // Analytics
+  analytics: {
+    views: {
+      type: Number,
+      default: 0
+    },
+    lastViewed: Date,
+    generatedViews: {
+      type: Number,
+      default: 0
+    },
+    exportCount: {
+      type: Number,
+      default: 0
+    }
+  },
+  
+  // Flags
+  isActive: {
+    type: Boolean,
+    default: true,
+    index: true
+  },
+  isFeatured: {
+    type: Boolean,
+    default: false
+  },
+  isPublic: {
+    type: Boolean,
+    default: false
+  },
+  
+  // Timestamps
+  publishedAt: Date,
+  lastModified: {
+    type: Date,
+    default: Date.now
+  }
 }, {
-    timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+});
+
+// Content Template Schema (for reusable templates)
+const contentTemplateSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 100
+  },
+  description: {
+    type: String,
+    maxlength: 500
+  },
+  specialty: {
+    type: String,
+    required: true,
+    enum: [
+      'cardiology', 'orthopedics', 'dermatology', 'pediatrics', 
+      'gynecology', 'neurology', 'psychiatry', 'oncology', 
+      'ophthalmology', 'dentistry', 'urology', 'endocrinology', 
+      'general medicine'
+    ],
+    index: true
+  },
+  template: {
+    type: mongoose.Schema.Types.Mixed,
+    required: true
+  },
+  isDefault: {
+    type: Boolean,
+    default: false
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  usageCount: {
+    type: Number,
+    default: 0
+  },
+  rating: {
+    type: Number,
+    min: 1,
+    max: 5,
+    default: 5
+  }
+}, {
+  timestamps: true
+});
+
+// Website Generation History Schema
+const generationHistorySchema = new mongoose.Schema({
+  websiteId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Website',
+    required: true,
+    index: true
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true
+  },
+  action: {
+    type: String,
+    enum: ['generated', 'regenerated', 'updated', 'published', 'archived'],
+    required: true
+  },
+  changes: {
+    type: mongoose.Schema.Types.Mixed
+  },
+  previousVersion: {
+    type: mongoose.Schema.Types.Mixed
+  },
+  metadata: {
+    aiModel: String,
+    processingTime: Number,
+    userAgent: String,
+    ipAddress: String
+  }
+}, {
+  timestamps: true
 });
 
 // Indexes for better performance
+websiteSchema.index({ userId: 1, specialty: 1 });
+websiteSchema.index({ userId: 1, status: 1 });
 websiteSchema.index({ userId: 1, createdAt: -1 });
-websiteSchema.index({ specialty: 1 });
-websiteSchema.index({ status: 1 });
-websiteSchema.index({ isActive: 1 });
+websiteSchema.index({ specialty: 1, isPublic: 1 });
+websiteSchema.index({ qualityScore: -1 });
 
-// Content variation schema for A/B testing
-const contentVariationSchema = new Schema({
-    websiteId: {
-        type: Schema.Types.ObjectId,
-        ref: "Website",
-        required: true
-    },
-    variationName: {
-        type: String,
-        required: true
-    },
-    content: {
-        type: Schema.Types.Mixed,
-        required: true
-    },
-    performance: {
-        views: {
-            type: Number,
-            default: 0
-        },
-        clicks: {
-            type: Number,
-            default: 0
-        },
-        conversions: {
-            type: Number,
-            default: 0
-        }
-    },
-    isActive: {
-        type: Boolean,
-        default: true
-    }
-}, {
-    timestamps: true
+contentTemplateSchema.index({ specialty: 1, isActive: 1 });
+contentTemplateSchema.index({ createdBy: 1 });
+contentTemplateSchema.index({ usageCount: -1 });
+
+generationHistorySchema.index({ websiteId: 1, createdAt: -1 });
+generationHistorySchema.index({ userId: 1, action: 1 });
+
+// Virtual for full contact address
+websiteSchema.virtual('contactInfo.fullAddress').get(function() {
+  if (this.contactInfo) {
+    const parts = [
+      this.contactInfo.address,
+      this.contactInfo.city,
+      this.contactInfo.state,
+      this.contactInfo.zipCode
+    ].filter(Boolean);
+    return parts.join(', ');
+  }
+  return '';
 });
 
-// Content template schema for reusable templates
-const contentTemplateSchema = new Schema({
-    name: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    specialty: {
-        type: String,
-        required: true
-    },
-    template: {
-        type: Schema.Types.Mixed,
-        required: true
-    },
-    isDefault: {
-        type: Boolean,
-        default: false
-    },
-    createdBy: {
-        type: String,
-        default: "system"
-    }
-}, {
-    timestamps: true
+// Virtual for services count
+websiteSchema.virtual('servicesCount').get(function() {
+  return this.services ? this.services.length : 0;
 });
 
-// Virtual for website URL
-websiteSchema.virtual('websiteUrl').get(function() {
-    return `/websites/${this._id}`;
+// Virtual for content completeness
+websiteSchema.virtual('contentCompleteness').get(function() {
+  let score = 0;
+  let maxScore = 0;
+  
+  // Check required sections
+  if (this.heroSection) score += 20;
+  maxScore += 20;
+  
+  if (this.aboutSection && this.aboutSection.content) score += 20;
+  maxScore += 20;
+  
+  if (this.services && this.services.length > 0) score += 20;
+  maxScore += 20;
+  
+  if (this.contactInfo && this.contactInfo.phone && this.contactInfo.email) score += 20;
+  maxScore += 20;
+  
+  if (this.seoMeta && this.seoMeta.title && this.seoMeta.description) score += 20;
+  maxScore += 20;
+  
+  return maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
 });
-
-// Virtual for total services count
-websiteSchema.virtual('serviceCount').get(function() {
-    return this.services.length;
-});
-
-// Methods
-websiteSchema.methods.generateSlug = function() {
-    return this.websiteTitle.toLowerCase().replace(/[^a-zA-Z0-9]/g, '-');
-};
-
-websiteSchema.methods.addService = function(serviceData) {
-    this.services.push(serviceData);
-    return this.save();
-};
-
-websiteSchema.methods.updateService = function(serviceId, updateData) {
-    const service = this.services.id(serviceId);
-    if (service) {
-        Object.assign(service, updateData);
-        return this.save();
-    }
-    throw new Error('Service not found');
-};
-
-websiteSchema.methods.removeService = function(serviceId) {
-    this.services.id(serviceId).remove();
-    return this.save();
-};
-
-// Static methods
-websiteSchema.statics.findBySpecialty = function(specialty) {
-    return this.find({ specialty: specialty.toLowerCase(), isActive: true });
-};
-
-websiteSchema.statics.findByUser = function(userId) {
-    return this.find({ userId, isActive: true }).sort({ createdAt: -1 });
-};
-
-websiteSchema.statics.getActiveWebsites = function() {
-    return this.find({ isActive: true, status: 'published' });
-};
 
 // Pre-save middleware
 websiteSchema.pre('save', function(next) {
-    // Auto-generate SEO title if not provided
-    if (!this.seoMeta.title) {
-        this.seoMeta.title = `${this.websiteTitle} - ${this.specialty} Specialist`;
-    }
-    
-    // Auto-generate SEO description if not provided
-    if (!this.seoMeta.description) {
-        this.seoMeta.description = `Professional ${this.specialty} services. ${this.tagline}`;
-    }
-    
-    next();
+  this.lastModified = new Date();
+  
+  // Auto-increment version on content changes
+  if (this.isModified() && !this.isNew) {
+    this.version += 1;
+  }
+  
+  next();
 });
 
-export const Website = mongoose.model("Website", websiteSchema);
-export const ContentVariation = mongoose.model("ContentVariation", contentVariationSchema);
-export const ContentTemplate = mongoose.model("ContentTemplate", contentTemplateSchema);
+// Post-save middleware for analytics
+websiteSchema.post('save', function(doc, next) {
+  if (doc.isModified('analytics.views')) {
+    // Could trigger analytics events here
+  }
+  next();
+});
+
+// Instance methods
+websiteSchema.methods.incrementViews = function() {
+  this.analytics.views += 1;
+  this.analytics.lastViewed = new Date();
+  return this.save();
+};
+
+websiteSchema.methods.updateQualityScore = function() {
+  // Calculate quality score based on content completeness
+  const completeness = this.contentCompleteness;
+  const servicesQuality = this.services.length >= 4 ? 0.2 : 0.1;
+  const seoQuality = this.seoMeta.keywords.length >= 5 ? 0.2 : 0.1;
+  
+  this.qualityScore = Math.min(1, (completeness / 100) * 0.6 + servicesQuality + seoQuality);
+  return this.save();
+};
+
+websiteSchema.methods.createVersion = function() {
+  this.previousVersions.push({
+    version: this.version,
+    content: this.toObject(),
+    createdAt: new Date()
+  });
+  
+  // Keep only last 5 versions
+  if (this.previousVersions.length > 5) {
+    this.previousVersions = this.previousVersions.slice(-5);
+  }
+  
+  return this.save();
+};
+
+// Static methods
+websiteSchema.statics.findBySpecialty = function(specialty, limit = 10) {
+  return this.find({ specialty, isActive: true, isPublic: true })
+    .sort({ qualityScore: -1, createdAt: -1 })
+    .limit(limit);
+};
+
+websiteSchema.statics.getPopularSpecialties = function() {
+  return this.aggregate([
+    { $match: { isActive: true } },
+    { $group: { _id: '$specialty', count: { $sum: 1 } } },
+    { $sort: { count: -1 } },
+    { $limit: 10 }
+  ]);
+};
+
+websiteSchema.statics.getUserStats = function(userId) {
+  return this.aggregate([
+    { $match: { userId: mongoose.Types.ObjectId(userId), isActive: true } },
+    {
+      $group: {
+        _id: null,
+        totalWebsites: { $sum: 1 },
+        avgQualityScore: { $avg: '$qualityScore' },
+        specialties: { $addToSet: '$specialty' },
+        published: {
+          $sum: { $cond: [{ $eq: ['$status', 'published'] }, 1, 0] }
+        }
+      }
+    }
+  ]);
+};
+
+// Create models
+const Website = mongoose.model('Website', websiteSchema);
+const ContentTemplate = mongoose.model('ContentTemplate', contentTemplateSchema);
+const ContentVariation = mongoose.model('ContentVariation', contentVariationSchema);
+const GenerationHistory = mongoose.model('GenerationHistory', generationHistorySchema);
+
+export { 
+  Website, 
+  ContentTemplate, 
+  ContentVariation, 
+  GenerationHistory 
+};

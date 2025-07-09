@@ -1,0 +1,163 @@
+<!-- Header Section -->
+<header class="header" role="banner">
+    <div class="header-top">
+        <div class="container">
+            <div class="header-top-content">
+                <div class="header-contact">
+                    <span class="contact-item">
+                        <i class="fas fa-phone" aria-hidden="true"></i>
+                        <a href="tel:{{phone}}" aria-label="Call {{practiceTitle}}">{{phone}}</a>
+                    </span>
+                    <span class="contact-item">
+                        <i class="fas fa-envelope" aria-hidden="true"></i>
+                        <a href="mailto:{{email}}" aria-label="Email {{practiceTitle}}">{{email}}</a>
+                    </span>
+                    <span class="contact-item">
+                        <i class="fas fa-clock" aria-hidden="true"></i>
+                        <span>{{hours}}</span>
+                    </span>
+                </div>
+                <div class="social-links">
+                    {{#if socialMedia.facebook}}
+                    <a href="{{socialMedia.facebook}}" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                        <i class="fab fa-facebook-f" aria-hidden="true"></i>
+                    </a>
+                    {{/if}}
+                    {{#if socialMedia.twitter}}
+                    <a href="{{socialMedia.twitter}}" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                        <i class="fab fa-twitter" aria-hidden="true"></i>
+                    </a>
+                    {{/if}}
+                    {{#if socialMedia.instagram}}
+                    <a href="{{socialMedia.instagram}}" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                        <i class="fab fa-instagram" aria-hidden="true"></i>
+                    </a>
+                    {{/if}}
+                    {{#if socialMedia.linkedin}}
+                    <a href="{{socialMedia.linkedin}}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                        <i class="fab fa-linkedin-in" aria-hidden="true"></i>
+                    </a>
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="header-main">
+        <div class="container">
+            <div class="header-main-content">
+                <div class="logo">
+                    <a href="/" aria-label="{{practiceTitle}} - Home">
+                        {{#if logo}}
+                        <img src="{{logo}}" alt="{{practiceTitle}} Logo" class="logo-image">
+                        {{else}}
+                        <h1 class="logo-text">{{practiceTitle}}</h1>
+                        {{/if}}
+                    </a>
+                </div>
+                
+                <nav class="main-nav" role="navigation" aria-label="Main navigation">
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="/" class="nav-link" aria-current="page">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#about" class="nav-link">About</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#services" class="nav-link">Services</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#contact" class="nav-link">Contact</a>
+                        </li>
+                        {{#if showAppointments}}
+                        <li class="nav-item">
+                            <a href="#appointments" class="nav-link">Appointments</a>
+                        </li>
+                        {{/if}}
+                        {{#if showBlog}}
+                        <li class="nav-item">
+                            <a href="/blog" class="nav-link">Blog</a>
+                        </li>
+                        {{/if}}
+                    </ul>
+                </nav>
+                
+                <div class="header-actions">
+                    <button class="btn btn-primary appointment-btn" onclick="scrollToSection('contact')">
+                        <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                        Book Appointment
+                    </button>
+                    <button class="mobile-menu-toggle" aria-label="Toggle mobile menu" onclick="toggleMobileMenu()">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="toggleMobileMenu()"></div>
+    
+    <!-- Mobile Menu -->
+    <nav class="mobile-menu" id="mobileMenu" role="navigation" aria-label="Mobile navigation">
+        <div class="mobile-menu-header">
+            <h3>Menu</h3>
+            <button class="mobile-menu-close" aria-label="Close mobile menu" onclick="toggleMobileMenu()">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+        <ul class="mobile-nav-menu">
+            <li class="mobile-nav-item">
+                <a href="/" class="mobile-nav-link">Home</a>
+            </li>
+            <li class="mobile-nav-item">
+                <a href="#about" class="mobile-nav-link" onclick="scrollToSection('about')">About</a>
+            </li>
+            <li class="mobile-nav-item">
+                <a href="#services" class="mobile-nav-link" onclick="scrollToSection('services')">Services</a>
+            </li>
+            <li class="mobile-nav-item">
+                <a href="#contact" class="mobile-nav-link" onclick="scrollToSection('contact')">Contact</a>
+            </li>
+            {{#if showAppointments}}
+            <li class="mobile-nav-item">
+                <a href="#appointments" class="mobile-nav-link" onclick="scrollToSection('appointments')">Appointments</a>
+            </li>
+            {{/if}}
+            {{#if showBlog}}
+            <li class="mobile-nav-item">
+                <a href="/blog" class="mobile-nav-link">Blog</a>
+            </li>
+            {{/if}}
+        </ul>
+        <div class="mobile-menu-contact">
+            <p><i class="fas fa-phone"></i> {{phone}}</p>
+            <p><i class="fas fa-envelope"></i> {{email}}</p>
+            <div class="mobile-social-links">
+                {{#if socialMedia.facebook}}
+                <a href="{{socialMedia.facebook}}" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                {{/if}}
+                {{#if socialMedia.twitter}}
+                <a href="{{socialMedia.twitter}}" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                {{/if}}
+                {{#if socialMedia.instagram}}
+                <a href="{{socialMedia.instagram}}" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                {{/if}}
+                {{#if socialMedia.linkedin}}
+                <a href="{{socialMedia.linkedin}}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+                {{/if}}
+            </div>
+        </div>
+    </nav>
+</header>

@@ -1,0 +1,254 @@
+<!-- General Practice Template -->
+<div class="specialty-template general-practice">
+    <!-- Hero Section -->
+    <section class="hero-section" role="banner">
+        <div class="hero-background">
+            <div class="hero-overlay"></div>
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">{{heroSection.headline}}</h1>
+                        <p class="hero-subtitle">{{heroSection.subheadline}}</p>
+                        <div class="hero-features">
+                            <div class="feature-item">
+                                <i class="fas fa-user-md" aria-hidden="true"></i>
+                                <span>Experienced Physicians</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-calendar-check" aria-hidden="true"></i>
+                                <span>Same-Day Appointments</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                                <span>Comprehensive Care</span>
+                            </div>
+                        </div>
+                        <div class="hero-actions">
+                            <button class="btn btn-primary btn-lg" onclick="scrollToSection('contact')">
+                                <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                                {{heroSection.ctaText}}
+                            </button>
+                            <button class="btn btn-secondary btn-lg" onclick="scrollToSection('about')">
+                                <i class="fas fa-info-circle" aria-hidden="true"></i>
+                                Learn More
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <img src="/images/general-practice-hero.jpg" alt="General Practice Medical Care" class="hero-img">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section" role="main">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2 class="section-title">{{aboutSection.title}}</h2>
+                    <p class="about-description">{{aboutSection.content}}</p>
+                    
+                    <div class="about-highlights">
+                        {{#each aboutSection.highlights}}
+                        <div class="highlight-item">
+                            <i class="fas fa-check-circle" aria-hidden="true"></i>
+                            <span>{{this}}</span>
+                        </div>
+                        {{/each}}
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">15+</div>
+                            <div class="stat-label">Years Experience</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">5000+</div>
+                            <div class="stat-label">Patients Served</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">98%</div>
+                            <div class="stat-label">Satisfaction Rate</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="about-image">
+                    <img src="/images/general-practice-about.jpg" alt="General Practice Team" class="about-img">
+                    <div class="about-badge">
+                        <i class="fas fa-award" aria-hidden="true"></i>
+                        <span>Board Certified</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Our Medical Services</h2>
+                <p class="section-subtitle">Comprehensive healthcare services for your entire family</p>
+            </div>
+            
+            <div class="services-grid">
+                {{#each services}}
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-{{icon}}" aria-hidden="true"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3 class="service-title">{{name}}</h3>
+                        <p class="service-description">{{description}}</p>
+                        <div class="service-features">
+                            <span class="feature-tag">Professional</span>
+                            <span class="feature-tag">Personalized</span>
+                        </div>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+            
+            <div class="services-cta">
+                <button class="btn btn-primary" onclick="scrollToSection('contact')">
+                    View All Services
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section class="why-choose-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Why Choose Our Practice?</h2>
+                <p class="section-subtitle">We're committed to providing exceptional healthcare</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-stethoscope" aria-hidden="true"></i>
+                    </div>
+                    <h3>Comprehensive Care</h3>
+                    <p>From routine check-ups to complex medical conditions, we provide complete healthcare services.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock" aria-hidden="true"></i>
+                    </div>
+                    <h3>Convenient Hours</h3>
+                    <p>Extended hours and same-day appointments available to fit your busy schedule.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-heart" aria-hidden="true"></i>
+                    </div>
+                    <h3>Patient-Centered</h3>
+                    <p>We listen to your concerns and work with you to develop personalized treatment plans.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-laptop-medical" aria-hidden="true"></i>
+                    </div>
+                    <h3>Modern Technology</h3>
+                    <p>State-of-the-art equipment and electronic health records for better care coordination.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Schedule Your Appointment</h2>
+                <p class="section-subtitle">Ready to take care of your health? Contact us today.</p>
+            </div>
+            
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Phone</h3>
+                            <p><a href="tel:{{phone}}">{{phone}}</a></p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Email</h3>
+                            <p><a href="mailto:{{email}}">{{email}}</a></p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Address</h3>
+                            <p>{{address}}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-clock" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Hours</h3>
+                            <p>{{hours}}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form-wrapper">
+                    <form class="contact-form" onsubmit="submitContactForm(event)">
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="preferred-date">Preferred Date</label>
+                            <input type="date" id="preferred-date" name="preferred-date">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Message or Reason for Visit *</label>
+                            <textarea id="message" name="message" rows="4" required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

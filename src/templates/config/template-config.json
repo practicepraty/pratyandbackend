@@ -1,0 +1,224 @@
+{
+  "templateVersion": "1.0.0",
+  "defaultTemplate": "general-practice",
+  "supportedSpecialties": [
+    "general-practice",
+    "dentistry",
+    "dermatology",
+    "cardiology",
+    "pediatrics"
+  ],
+  "templateMappings": {
+    "general medicine": "general-practice",
+    "family medicine": "general-practice",
+    "primary care": "general-practice",
+    "internal medicine": "general-practice",
+    "dentistry": "dentistry",
+    "dental": "dentistry",
+    "oral health": "dentistry",
+    "orthodontics": "dentistry",
+    "dermatology": "dermatology",
+    "skin": "dermatology",
+    "cosmetic dermatology": "dermatology",
+    "cardiology": "cardiology",
+    "heart": "cardiology",
+    "cardiac": "cardiology",
+    "cardiovascular": "cardiology",
+    "pediatrics": "pediatrics",
+    "pediatric": "pediatrics",
+    "children": "pediatrics",
+    "child health": "pediatrics"
+  },
+  "colorSchemes": {
+    "general-practice": {
+      "primary": "#2563eb",
+      "secondary": "#64748b",
+      "accent": "#10b981",
+      "background": "#ffffff",
+      "cardBackground": "#f9fafb",
+      "textColor": "#1f2937",
+      "borderColor": "#e5e7eb"
+    },
+    "dentistry": {
+      "primary": "#0ea5e9",
+      "secondary": "#64748b",
+      "accent": "#06b6d4",
+      "background": "#ffffff",
+      "cardBackground": "#f0f9ff",
+      "textColor": "#1f2937",
+      "borderColor": "#e0f2fe"
+    },
+    "dermatology": {
+      "primary": "#ec4899",
+      "secondary": "#64748b",
+      "accent": "#f97316",
+      "background": "#ffffff",
+      "cardBackground": "#fdf2f8",
+      "textColor": "#1f2937",
+      "borderColor": "#fce7f3"
+    },
+    "cardiology": {
+      "primary": "#dc2626",
+      "secondary": "#64748b",
+      "accent": "#ea580c",
+      "background": "#ffffff",
+      "cardBackground": "#fef2f2",
+      "textColor": "#1f2937",
+      "borderColor": "#fecaca"
+    },
+    "pediatrics": {
+      "primary": "#7c3aed",
+      "secondary": "#64748b",
+      "accent": "#f59e0b",
+      "background": "#ffffff",
+      "cardBackground": "#f3f4f6",
+      "textColor": "#1f2937",
+      "borderColor": "#e5e7eb"
+    }
+  },
+  "templateFeatures": {
+    "general-practice": {
+      "showEmergencyBanner": true,
+      "showAppointments": true,
+      "showBlog": false,
+      "showTestimonials": true,
+      "showNewsletter": true,
+      "customSections": ["why-choose", "stats"],
+      "primaryCTA": "Schedule Appointment",
+      "secondaryCTA": "Learn More"
+    },
+    "dentistry": {
+      "showEmergencyBanner": false,
+      "showAppointments": true,
+      "showBlog": false,
+      "showTestimonials": true,
+      "showNewsletter": true,
+      "customSections": ["technology", "comfort", "specialties"],
+      "primaryCTA": "Book Appointment",
+      "secondaryCTA": "Our Services"
+    },
+    "dermatology": {
+      "showEmergencyBanner": false,
+      "showAppointments": true,
+      "showBlog": true,
+      "showTestimonials": true,
+      "showNewsletter": true,
+      "customSections": ["treatments", "screening", "categories"],
+      "primaryCTA": "Schedule Consultation",
+      "secondaryCTA": "Our Treatments"
+    },
+    "cardiology": {
+      "showEmergencyBanner": true,
+      "showAppointments": true,
+      "showBlog": false,
+      "showTestimonials": true,
+      "showNewsletter": false,
+      "customSections": ["diagnostic", "conditions", "prevention"],
+      "primaryCTA": "Schedule Consultation",
+      "secondaryCTA": "Heart Services"
+    },
+    "pediatrics": {
+      "showEmergencyBanner": false,
+      "showAppointments": true,
+      "showBlog": false,
+      "showTestimonials": true,
+      "showNewsletter": true,
+      "customSections": ["age-groups", "vaccination", "resources", "environment"],
+      "primaryCTA": "Schedule Visit",
+      "secondaryCTA": "Our Services"
+    }
+  },
+  "seoDefaults": {
+    "general-practice": {
+      "titleSuffix": "Family Medicine & Primary Care",
+      "metaKeywords": ["family medicine", "primary care", "healthcare", "medical center", "physician"],
+      "description": "Comprehensive family medicine and primary care services for patients of all ages."
+    },
+    "dentistry": {
+      "titleSuffix": "Dental Care & Oral Health",
+      "metaKeywords": ["dentistry", "dental care", "oral health", "teeth cleaning", "dentist"],
+      "description": "Professional dental care services including general dentistry, cosmetic treatments, and oral health maintenance."
+    },
+    "dermatology": {
+      "titleSuffix": "Dermatology & Skin Care",
+      "metaKeywords": ["dermatology", "skin care", "dermatologist", "skin cancer screening", "cosmetic dermatology"],
+      "description": "Expert dermatology services including medical and cosmetic treatments for healthy, beautiful skin."
+    },
+    "cardiology": {
+      "titleSuffix": "Cardiology & Heart Care",
+      "metaKeywords": ["cardiology", "heart care", "cardiologist", "cardiac services", "heart health"],
+      "description": "Comprehensive cardiology services including heart disease prevention, diagnosis, and treatment."
+    },
+    "pediatrics": {
+      "titleSuffix": "Pediatric Care & Child Health",
+      "metaKeywords": ["pediatrics", "child healthcare", "pediatrician", "children's health", "vaccinations"],
+      "description": "Compassionate pediatric care for children from birth through adolescence in a child-friendly environment."
+    }
+  },
+  "fallbackContent": {
+    "defaultTitle": "Medical Practice",
+    "defaultTagline": "Quality Healthcare You Can Trust",
+    "defaultDescription": "Professional medical services with experienced physicians and personalized care.",
+    "defaultServices": [
+      "General Consultation",
+      "Preventive Care",
+      "Health Screenings",
+      "Chronic Disease Management",
+      "Wellness Programs"
+    ],
+    "defaultContact": {
+      "phone": "(555) 123-4567",
+      "email": "info@medicalpractice.com",
+      "address": "123 Medical Center Drive, Healthcare City, HC 12345",
+      "hours": "Monday-Friday: 9:00 AM - 5:00 PM"
+    }
+  },
+  "templateSettings": {
+    "enableResponsiveDesign": true,
+    "enableAccessibility": true,
+    "enableSEO": true,
+    "enableAnalytics": true,
+    "enableFormValidation": true,
+    "enableMobileMenu": true,
+    "enableBackToTop": true,
+    "enableSmoothScroll": true,
+    "enableLazyLoading": true,
+    "enableProgressIndicator": false
+  },
+  "customizationOptions": {
+    "fonts": {
+      "primary": "Inter",
+      "secondary": "Inter",
+      "sizes": ["small", "medium", "large"]
+    },
+    "layouts": {
+      "headerStyles": ["fixed", "static", "transparent"],
+      "footerStyles": ["simple", "detailed", "minimal"],
+      "sectionSpacing": ["compact", "normal", "spacious"]
+    },
+    "animations": {
+      "enableHoverEffects": true,
+      "enableScrollAnimations": false,
+      "enableLoadingAnimations": true,
+      "animationDuration": "300ms"
+    }
+  },
+  "integrations": {
+    "appointmentBooking": {
+      "enabled": true,
+      "providers": ["calendly", "acuity", "custom"]
+    },
+    "analytics": {
+      "enabled": true,
+      "providers": ["google-analytics", "custom"]
+    },
+    "socialMedia": {
+      "enabled": true,
+      "platforms": ["facebook", "twitter", "instagram", "linkedin"]
+    },
+    "newsletter": {
+      "enabled": true,
+      "providers": ["mailchimp", "custom"]
+    }
+  }
+}

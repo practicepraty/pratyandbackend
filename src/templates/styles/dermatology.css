@@ -1,0 +1,203 @@
+/* Dermatology Specialty Styles */
+.dermatology {
+    --primary-color: #ec4899;
+    --secondary-color: #64748b;
+    --accent-color: #f97316;
+    --specialty-gradient: linear-gradient(135deg, #ec4899, #db2777);
+}
+
+.dermatology .hero-section {
+    background: var(--specialty-gradient);
+}
+
+.dermatology .service-icon {
+    background: var(--primary-color);
+}
+
+.dermatology .feature-item i {
+    color: var(--accent-color);
+}
+
+.dermatology .services-categories {
+    display: grid;
+    gap: 3rem;
+}
+
+.dermatology .service-category {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.dermatology .category-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.dermatology .category-title i {
+    color: var(--primary-color);
+}
+
+.dermatology .medical-service {
+    border-left: 4px solid var(--primary-color);
+}
+
+.dermatology .cosmetic-service {
+    border-left: 4px solid var(--accent-color);
+}
+
+.dermatology .treatments-section {
+    background: var(--card-bg);
+    padding: 4rem 0;
+}
+
+.dermatology .treatments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.dermatology .treatment-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.dermatology .treatment-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.dermatology .treatment-image {
+    height: 200px;
+    overflow: hidden;
+}
+
+.dermatology .treatment-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.dermatology .treatment-card:hover .treatment-img {
+    transform: scale(1.05);
+}
+
+.dermatology .treatment-content {
+    padding: 2rem;
+}
+
+.dermatology .treatment-content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.dermatology .treatment-content p {
+    color: var(--secondary-color);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.dermatology .treatment-benefits {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.dermatology .benefit-tag {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.dermatology .screening-section {
+    padding: 4rem 0;
+}
+
+.dermatology .screening-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+}
+
+.dermatology .screening-features {
+    display: grid;
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.dermatology .screening-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.dermatology .screening-item:hover {
+    background: white;
+    box-shadow: var(--shadow);
+}
+
+.dermatology .screening-item i {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-top: 0.25rem;
+}
+
+.dermatology .screening-item h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.dermatology .screening-item p {
+    color: var(--secondary-color);
+    line-height: 1.6;
+}
+
+.dermatology .screening-cta {
+    margin-top: 2rem;
+}
+
+.dermatology .screening-img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dermatology .screening-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .dermatology .treatments-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dermatology .services-categories {
+        gap: 2rem;
+    }
+}

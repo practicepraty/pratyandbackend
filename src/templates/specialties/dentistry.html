@@ -1,0 +1,329 @@
+<!-- Dentistry Template -->
+<div class="specialty-template dentistry">
+    <!-- Hero Section -->
+    <section class="hero-section" role="banner">
+        <div class="hero-background">
+            <div class="hero-overlay"></div>
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">{{heroSection.headline}}</h1>
+                        <p class="hero-subtitle">{{heroSection.subheadline}}</p>
+                        <div class="hero-features">
+                            <div class="feature-item">
+                                <i class="fas fa-tooth" aria-hidden="true"></i>
+                                <span>Advanced Dental Care</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-smile" aria-hidden="true"></i>
+                                <span>Cosmetic Dentistry</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                                <span>Pain-Free Procedures</span>
+                            </div>
+                        </div>
+                        <div class="hero-actions">
+                            <button class="btn btn-primary btn-lg" onclick="scrollToSection('contact')">
+                                <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                                {{heroSection.ctaText}}
+                            </button>
+                            <button class="btn btn-secondary btn-lg" onclick="scrollToSection('services')">
+                                <i class="fas fa-tooth" aria-hidden="true"></i>
+                                Our Services
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <img src="/images/dentistry-hero.jpg" alt="Modern Dental Care" class="hero-img">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section" role="main">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2 class="section-title">{{aboutSection.title}}</h2>
+                    <p class="about-description">{{aboutSection.content}}</p>
+                    
+                    <div class="about-highlights">
+                        {{#each aboutSection.highlights}}
+                        <div class="highlight-item">
+                            <i class="fas fa-check-circle" aria-hidden="true"></i>
+                            <span>{{this}}</span>
+                        </div>
+                        {{/each}}
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">10+</div>
+                            <div class="stat-label">Years Experience</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">3000+</div>
+                            <div class="stat-label">Smiles Restored</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">99%</div>
+                            <div class="stat-label">Patient Satisfaction</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="about-image">
+                    <img src="/images/dentistry-about.jpg" alt="Dental Team" class="about-img">
+                    <div class="about-badge">
+                        <i class="fas fa-award" aria-hidden="true"></i>
+                        <span>ADA Certified</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Comprehensive Dental Services</h2>
+                <p class="section-subtitle">From routine cleanings to advanced procedures, we've got you covered</p>
+            </div>
+            
+            <div class="services-grid">
+                {{#each services}}
+                <div class="service-card dental-service">
+                    <div class="service-icon">
+                        <i class="fas fa-{{icon}}" aria-hidden="true"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3 class="service-title">{{name}}</h3>
+                        <p class="service-description">{{description}}</p>
+                        <div class="service-features">
+                            <span class="feature-tag">Pain-Free</span>
+                            <span class="feature-tag">Modern Tech</span>
+                        </div>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+            
+            <div class="dental-specialties">
+                <h3>Specialized Treatments</h3>
+                <div class="specialties-grid">
+                    <div class="specialty-item">
+                        <i class="fas fa-tooth" aria-hidden="true"></i>
+                        <span>Orthodontics</span>
+                    </div>
+                    <div class="specialty-item">
+                        <i class="fas fa-teeth" aria-hidden="true"></i>
+                        <span>Periodontics</span>
+                    </div>
+                    <div class="specialty-item">
+                        <i class="fas fa-user-md" aria-hidden="true"></i>
+                        <span>Oral Surgery</span>
+                    </div>
+                    <div class="specialty-item">
+                        <i class="fas fa-child" aria-hidden="true"></i>
+                        <span>Pediatric Dentistry</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Section -->
+    <section class="technology-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Advanced Dental Technology</h2>
+                <p class="section-subtitle">We use the latest technology for precise, comfortable treatment</p>
+            </div>
+            
+            <div class="technology-grid">
+                <div class="tech-card">
+                    <div class="tech-icon">
+                        <i class="fas fa-x-ray" aria-hidden="true"></i>
+                    </div>
+                    <h3>Digital X-Rays</h3>
+                    <p>Safer, faster, and more accurate than traditional film X-rays with 90% less radiation.</p>
+                </div>
+                
+                <div class="tech-card">
+                    <div class="tech-icon">
+                        <i class="fas fa-scanner" aria-hidden="true"></i>
+                    </div>
+                    <h3>Intraoral Cameras</h3>
+                    <p>High-definition cameras that help us detect problems early and show you exactly what we see.</p>
+                </div>
+                
+                <div class="tech-card">
+                    <div class="tech-icon">
+                        <i class="fas fa-laser" aria-hidden="true"></i>
+                    </div>
+                    <h3>Laser Dentistry</h3>
+                    <p>Minimally invasive procedures with less pain, bleeding, and faster healing times.</p>
+                </div>
+                
+                <div class="tech-card">
+                    <div class="tech-icon">
+                        <i class="fas fa-cube" aria-hidden="true"></i>
+                    </div>
+                    <h3>3D Imaging</h3>
+                    <p>Precise treatment planning for implants, extractions, and complex procedures.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Patient Comfort Section -->
+    <section class="comfort-section">
+        <div class="container">
+            <div class="comfort-content">
+                <div class="comfort-text">
+                    <h2 class="section-title">Your Comfort is Our Priority</h2>
+                    <p>We understand that dental visits can be stressful. That's why we've created a comfortable, relaxing environment with:</p>
+                    
+                    <div class="comfort-features">
+                        <div class="comfort-item">
+                            <i class="fas fa-spa" aria-hidden="true"></i>
+                            <div>
+                                <h4>Sedation Options</h4>
+                                <p>Nitrous oxide and oral sedation available for anxious patients</p>
+                            </div>
+                        </div>
+                        
+                        <div class="comfort-item">
+                            <i class="fas fa-tv" aria-hidden="true"></i>
+                            <div>
+                                <h4>Entertainment</h4>
+                                <p>Ceiling-mounted TVs and headphones to keep you relaxed</p>
+                            </div>
+                        </div>
+                        
+                        <div class="comfort-item">
+                            <i class="fas fa-coffee" aria-hidden="true"></i>
+                            <div>
+                                <h4>Amenities</h4>
+                                <p>Complimentary refreshments and comfortable seating</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comfort-image">
+                    <img src="/images/dental-comfort.jpg" alt="Comfortable Dental Office" class="comfort-img">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Schedule Your Dental Appointment</h2>
+                <p class="section-subtitle">Ready for a healthier, brighter smile? Contact us today.</p>
+            </div>
+            
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Phone</h3>
+                            <p><a href="tel:{{phone}}">{{phone}}</a></p>
+                            <small>Call for emergency appointments</small>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Email</h3>
+                            <p><a href="mailto:{{email}}">{{email}}</a></p>
+                            <small>General inquiries</small>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Address</h3>
+                            <p>{{address}}</p>
+                            <small>Parking available</small>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-clock" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Hours</h3>
+                            <p>{{hours}}</p>
+                            <small>Emergency calls accepted</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form-wrapper">
+                    <form class="contact-form" onsubmit="submitContactForm(event)">
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="service">Service Needed</label>
+                            <select id="service" name="service">
+                                <option value="">Select a service</option>
+                                <option value="cleaning">Cleaning & Checkup</option>
+                                <option value="filling">Filling</option>
+                                <option value="crown">Crown/Bridge</option>
+                                <option value="cosmetic">Cosmetic Dentistry</option>
+                                <option value="emergency">Emergency</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="preferred-date">Preferred Date</label>
+                            <input type="date" id="preferred-date" name="preferred-date">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Additional Information</label>
+                            <textarea id="message" name="message" rows="4" placeholder="Tell us about your dental concerns or questions"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                            Request Appointment
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

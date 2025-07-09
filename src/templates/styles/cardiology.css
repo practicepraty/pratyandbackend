@@ -1,0 +1,237 @@
+/* Cardiology Specialty Styles */
+.cardiology {
+    --primary-color: #dc2626;
+    --secondary-color: #64748b;
+    --accent-color: #ea580c;
+    --specialty-gradient: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+.cardiology .hero-section {
+    background: var(--specialty-gradient);
+}
+
+.cardiology .service-icon {
+    background: var(--primary-color);
+}
+
+.cardiology .feature-item i {
+    color: var(--accent-color);
+}
+
+.cardiology .diagnostic-section {
+    background: var(--card-bg);
+    padding: 4rem 0;
+}
+
+.cardiology .diagnostic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.cardiology .diagnostic-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    text-align: center;
+    transition: var(--transition);
+    border-top: 4px solid var(--primary-color);
+}
+
+.cardiology .diagnostic-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.cardiology .diagnostic-icon {
+    width: 70px;
+    height: 70px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin: 0 auto 1.5rem;
+}
+
+.cardiology .diagnostic-content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.cardiology .diagnostic-content p {
+    color: var(--secondary-color);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.cardiology .diagnostic-features {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.cardiology .conditions-section {
+    padding: 4rem 0;
+}
+
+.cardiology .conditions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.cardiology .condition-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    text-align: center;
+    transition: var(--transition);
+    border: 1px solid var(--border-color);
+}
+
+.cardiology .condition-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+}
+
+.cardiology .condition-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin: 0 auto 1.5rem;
+}
+
+.cardiology .condition-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.cardiology .condition-card p {
+    color: var(--secondary-color);
+    line-height: 1.6;
+}
+
+.cardiology .prevention-section {
+    background: var(--card-bg);
+    padding: 4rem 0;
+}
+
+.cardiology .prevention-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+}
+
+.cardiology .prevention-features {
+    display: grid;
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.cardiology .prevention-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.cardiology .prevention-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.cardiology .prevention-item i {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-top: 0.25rem;
+}
+
+.cardiology .prevention-item h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.cardiology .prevention-item p {
+    color: var(--secondary-color);
+    line-height: 1.6;
+}
+
+.cardiology .prevention-cta {
+    margin-top: 2rem;
+}
+
+.cardiology .prevention-img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+}
+
+.cardiology .cardiology-service {
+    border-left: 4px solid var(--primary-color);
+}
+
+.cardiology .cardiology-service:hover {
+    border-left-color: var(--accent-color);
+}
+
+/* Emergency styling */
+.cardiology .emergency-banner {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.cardiology .emergency-banner i {
+    color: var(--primary-color);
+    font-size: 1.25rem;
+}
+
+.cardiology .emergency-banner span {
+    color: #991b1b;
+    font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .cardiology .prevention-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .cardiology .diagnostic-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cardiology .conditions-grid {
+        grid-template-columns: 1fr;
+    }
+}

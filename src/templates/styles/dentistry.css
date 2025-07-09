@@ -1,0 +1,207 @@
+/* Dentistry Specialty Styles */
+.dentistry {
+    --primary-color: #0ea5e9;
+    --secondary-color: #64748b;
+    --accent-color: #06b6d4;
+    --specialty-gradient: linear-gradient(135deg, #0ea5e9, #0284c7);
+}
+
+.dentistry .hero-section {
+    background: var(--specialty-gradient);
+}
+
+.dentistry .service-icon {
+    background: var(--primary-color);
+}
+
+.dentistry .feature-item i {
+    color: var(--accent-color);
+}
+
+.dentistry .dental-specialties {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-top: 3rem;
+}
+
+.dentistry .dental-specialties h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: var(--text-color);
+}
+
+.dentistry .specialties-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.dentistry .specialty-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.dentistry .specialty-item:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.dentistry .specialty-item i {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
+
+.dentistry .specialty-item:hover i {
+    color: white;
+}
+
+.dentistry .technology-section {
+    background: var(--card-bg);
+    padding: 4rem 0;
+}
+
+.dentistry .technology-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.dentistry .tech-card {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.dentistry .tech-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.dentistry .tech-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin: 0 auto 1.5rem;
+}
+
+.dentistry .tech-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.dentistry .tech-card p {
+    color: var(--secondary-color);
+    line-height: 1.6;
+}
+
+.dentistry .comfort-section {
+    padding: 4rem 0;
+}
+
+.dentistry .comfort-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+}
+
+.dentistry .comfort-features {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.dentistry .comfort-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.dentistry .comfort-item:hover {
+    background: white;
+    box-shadow: var(--shadow);
+}
+
+.dentistry .comfort-item i {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-top: 0.25rem;
+}
+
+.dentistry .comfort-item h4 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.dentistry .comfort-item p {
+    color: var(--secondary-color);
+    line-height: 1.6;
+}
+
+.dentistry .comfort-img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+}
+
+.dentistry .services-categories {
+    display: grid;
+    gap: 3rem;
+}
+
+.dentistry .category-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.dentistry .category-title i {
+    color: var(--primary-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dentistry .comfort-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .dentistry .specialties-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dentistry .technology-grid {
+        grid-template-columns: 1fr;
+    }
+}

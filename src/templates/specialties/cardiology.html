@@ -1,0 +1,405 @@
+<!-- Cardiology Template -->
+<div class="specialty-template cardiology">
+    <!-- Hero Section -->
+    <section class="hero-section" role="banner">
+        <div class="hero-background">
+            <div class="hero-overlay"></div>
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">{{heroSection.headline}}</h1>
+                        <p class="hero-subtitle">{{heroSection.subheadline}}</p>
+                        <div class="hero-features">
+                            <div class="feature-item">
+                                <i class="fas fa-heartbeat" aria-hidden="true"></i>
+                                <span>Advanced Cardiology</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-stethoscope" aria-hidden="true"></i>
+                                <span>Expert Diagnosis</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                                <span>Preventive Care</span>
+                            </div>
+                        </div>
+                        <div class="hero-actions">
+                            <button class="btn btn-primary btn-lg" onclick="scrollToSection('contact')">
+                                <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                                {{heroSection.ctaText}}
+                            </button>
+                            <button class="btn btn-secondary btn-lg" onclick="scrollToSection('services')">
+                                <i class="fas fa-heart" aria-hidden="true"></i>
+                                Heart Services
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <img src="/images/cardiology-hero.jpg" alt="Cardiology Care" class="hero-img">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section" role="main">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2 class="section-title">{{aboutSection.title}}</h2>
+                    <p class="about-description">{{aboutSection.content}}</p>
+                    
+                    <div class="about-highlights">
+                        {{#each aboutSection.highlights}}
+                        <div class="highlight-item">
+                            <i class="fas fa-check-circle" aria-hidden="true"></i>
+                            <span>{{this}}</span>
+                        </div>
+                        {{/each}}
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">15+</div>
+                            <div class="stat-label">Years Experience</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">2500+</div>
+                            <div class="stat-label">Hearts Treated</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">98%</div>
+                            <div class="stat-label">Success Rate</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="about-image">
+                    <img src="/images/cardiology-about.jpg" alt="Cardiology Team" class="about-img">
+                    <div class="about-badge">
+                        <i class="fas fa-award" aria-hidden="true"></i>
+                        <span>Board Certified</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Comprehensive Heart Care Services</h2>
+                <p class="section-subtitle">From prevention to advanced treatment, we protect your heart health</p>
+            </div>
+            
+            <div class="services-grid">
+                {{#each services}}
+                <div class="service-card cardiology-service">
+                    <div class="service-icon">
+                        <i class="fas fa-{{icon}}" aria-hidden="true"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3 class="service-title">{{name}}</h3>
+                        <p class="service-description">{{description}}</p>
+                        <div class="service-features">
+                            <span class="feature-tag">Advanced</span>
+                            <span class="feature-tag">Precise</span>
+                        </div>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </section>
+
+    <!-- Diagnostic Testing Section -->
+    <section class="diagnostic-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Advanced Cardiac Diagnostics</h2>
+                <p class="section-subtitle">State-of-the-art testing for accurate heart health assessment</p>
+            </div>
+            
+            <div class="diagnostic-grid">
+                <div class="diagnostic-card">
+                    <div class="diagnostic-icon">
+                        <i class="fas fa-chart-line" aria-hidden="true"></i>
+                    </div>
+                    <div class="diagnostic-content">
+                        <h3>Electrocardiogram (ECG)</h3>
+                        <p>Non-invasive test to measure heart rhythm and electrical activity</p>
+                        <div class="diagnostic-features">
+                            <span class="feature-tag">Quick</span>
+                            <span class="feature-tag">Painless</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="diagnostic-card">
+                    <div class="diagnostic-icon">
+                        <i class="fas fa-wave-square" aria-hidden="true"></i>
+                    </div>
+                    <div class="diagnostic-content">
+                        <h3>Echocardiogram</h3>
+                        <p>Ultrasound imaging to assess heart structure and function</p>
+                        <div class="diagnostic-features">
+                            <span class="feature-tag">Detailed</span>
+                            <span class="feature-tag">Safe</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="diagnostic-card">
+                    <div class="diagnostic-icon">
+                        <i class="fas fa-running" aria-hidden="true"></i>
+                    </div>
+                    <div class="diagnostic-content">
+                        <h3>Stress Testing</h3>
+                        <p>Exercise or pharmacological stress tests to evaluate heart performance</p>
+                        <div class="diagnostic-features">
+                            <span class="feature-tag">Comprehensive</span>
+                            <span class="feature-tag">Monitored</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="diagnostic-card">
+                    <div class="diagnostic-icon">
+                        <i class="fas fa-heartbeat" aria-hidden="true"></i>
+                    </div>
+                    <div class="diagnostic-content">
+                        <h3>Holter Monitor</h3>
+                        <p>24-48 hour continuous heart rhythm monitoring</p>
+                        <div class="diagnostic-features">
+                            <span class="feature-tag">Continuous</span>
+                            <span class="feature-tag">Portable</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Heart Conditions Section -->
+    <section class="conditions-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Conditions We Treat</h2>
+                <p class="section-subtitle">Expert treatment for a wide range of cardiovascular conditions</p>
+            </div>
+            
+            <div class="conditions-grid">
+                <div class="condition-card">
+                    <div class="condition-icon">
+                        <i class="fas fa-heart" aria-hidden="true"></i>
+                    </div>
+                    <h3>Coronary Artery Disease</h3>
+                    <p>Comprehensive treatment for blocked or narrowed coronary arteries</p>
+                </div>
+                
+                <div class="condition-card">
+                    <div class="condition-icon">
+                        <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
+                    </div>
+                    <h3>Hypertension</h3>
+                    <p>Blood pressure management and cardiovascular risk reduction</p>
+                </div>
+                
+                <div class="condition-card">
+                    <div class="condition-icon">
+                        <i class="fas fa-heartbeat" aria-hidden="true"></i>
+                    </div>
+                    <h3>Arrhythmias</h3>
+                    <p>Treatment for irregular heart rhythms and palpitations</p>
+                </div>
+                
+                <div class="condition-card">
+                    <div class="condition-icon">
+                        <i class="fas fa-heart-broken" aria-hidden="true"></i>
+                    </div>
+                    <h3>Heart Failure</h3>
+                    <p>Management of heart failure symptoms and improved quality of life</p>
+                </div>
+                
+                <div class="condition-card">
+                    <div class="condition-icon">
+                        <i class="fas fa-circle-notch" aria-hidden="true"></i>
+                    </div>
+                    <h3>Valve Disease</h3>
+                    <p>Treatment for heart valve disorders and dysfunction</p>
+                </div>
+                
+                <div class="condition-card">
+                    <div class="condition-icon">
+                        <i class="fas fa-droplet" aria-hidden="true"></i>
+                    </div>
+                    <h3>High Cholesterol</h3>
+                    <p>Cholesterol management and atherosclerosis prevention</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Prevention Section -->
+    <section class="prevention-section">
+        <div class="container">
+            <div class="prevention-content">
+                <div class="prevention-text">
+                    <h2 class="section-title">Heart Disease Prevention</h2>
+                    <p>Prevention is the best medicine. Our comprehensive prevention programs help you maintain optimal heart health and reduce your risk of cardiovascular disease.</p>
+                    
+                    <div class="prevention-features">
+                        <div class="prevention-item">
+                            <i class="fas fa-apple-alt" aria-hidden="true"></i>
+                            <div>
+                                <h4>Lifestyle Counseling</h4>
+                                <p>Personalized nutrition and exercise plans for heart health</p>
+                            </div>
+                        </div>
+                        
+                        <div class="prevention-item">
+                            <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                            <div>
+                                <h4>Risk Assessment</h4>
+                                <p>Comprehensive evaluation of your cardiovascular risk factors</p>
+                            </div>
+                        </div>
+                        
+                        <div class="prevention-item">
+                            <i class="fas fa-calendar-check" aria-hidden="true"></i>
+                            <div>
+                                <h4>Regular Monitoring</h4>
+                                <p>Scheduled follow-ups to track your heart health progress</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="prevention-cta">
+                        <button class="btn btn-primary" onclick="scrollToSection('contact')">
+                            Start Prevention Plan
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="prevention-image">
+                    <img src="/images/heart-prevention.jpg" alt="Heart Disease Prevention" class="prevention-img">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Schedule Your Cardiac Consultation</h2>
+                <p class="section-subtitle">Take charge of your heart health today</p>
+            </div>
+            
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Phone</h3>
+                            <p><a href="tel:{{phone}}">{{phone}}</a></p>
+                            <small>24/7 emergency line</small>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Email</h3>
+                            <p><a href="mailto:{{email}}">{{email}}</a></p>
+                            <small>General inquiries</small>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Address</h3>
+                            <p>{{address}}</p>
+                            <small>Heart center location</small>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-clock" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Hours</h3>
+                            <p>{{hours}}</p>
+                            <small>Emergency services available</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form-wrapper">
+                    <form class="contact-form" onsubmit="submitContactForm(event)">
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="service">Service Needed</label>
+                            <select id="service" name="service">
+                                <option value="">Select a service</option>
+                                <option value="consultation">Cardiac Consultation</option>
+                                <option value="screening">Heart Screening</option>
+                                <option value="stress-test">Stress Test</option>
+                                <option value="ecg">ECG/EKG</option>
+                                <option value="follow-up">Follow-up Visit</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="urgency">Urgency Level</label>
+                            <select id="urgency" name="urgency">
+                                <option value="routine">Routine</option>
+                                <option value="urgent">Urgent</option>
+                                <option value="emergency">Emergency</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="preferred-date">Preferred Date</label>
+                            <input type="date" id="preferred-date" name="preferred-date">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Symptoms or Concerns</label>
+                            <textarea id="message" name="message" rows="4" placeholder="Please describe your symptoms or cardiac concerns"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-heartbeat" aria-hidden="true"></i>
+                            Request Consultation
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

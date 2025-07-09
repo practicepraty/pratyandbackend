@@ -686,6 +686,9 @@ class AIService {
             memoryUsage: JSON.stringify([...this.generationCache.entries()]).length
         };
     }
+
+
+    
 }
 
 export default new AIService();

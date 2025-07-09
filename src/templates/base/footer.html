@@ -1,0 +1,137 @@
+<!-- Footer Section -->
+<footer class="footer" role="contentinfo">
+    <div class="footer-main">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section footer-about">
+                    <div class="footer-logo">
+                        {{#if logo}}
+                        <img src="{{logo}}" alt="{{practiceTitle}} Logo" class="footer-logo-image">
+                        {{else}}
+                        <h3 class="footer-logo-text">{{practiceTitle}}</h3>
+                        {{/if}}
+                    </div>
+                    <p class="footer-description">{{tagline}}</p>
+                    <div class="footer-social">
+                        {{#if socialMedia.facebook}}
+                        <a href="{{socialMedia.facebook}}" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                            <i class="fab fa-facebook-f" aria-hidden="true"></i>
+                        </a>
+                        {{/if}}
+                        {{#if socialMedia.twitter}}
+                        <a href="{{socialMedia.twitter}}" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                            <i class="fab fa-twitter" aria-hidden="true"></i>
+                        </a>
+                        {{/if}}
+                        {{#if socialMedia.instagram}}
+                        <a href="{{socialMedia.instagram}}" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                            <i class="fab fa-instagram" aria-hidden="true"></i>
+                        </a>
+                        {{/if}}
+                        {{#if socialMedia.linkedin}}
+                        <a href="{{socialMedia.linkedin}}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                            <i class="fab fa-linkedin-in" aria-hidden="true"></i>
+                        </a>
+                        {{/if}}
+                    </div>
+                </div>
+                
+                <div class="footer-section footer-services">
+                    <h4>Our Services</h4>
+                    <ul>
+                        {{#each services}}
+                        <li><a href="#services">{{name}}</a></li>
+                        {{/each}}
+                    </ul>
+                </div>
+                
+                <div class="footer-section footer-contact">
+                    <h4>Contact Information</h4>
+                    <div class="footer-contact-info">
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                            <span>{{address}}</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-phone" aria-hidden="true"></i>
+                            <a href="tel:{{phone}}" aria-label="Call {{practiceTitle}}">{{phone}}</a>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                            <a href="mailto:{{email}}" aria-label="Email {{practiceTitle}}">{{email}}</a>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-clock" aria-hidden="true"></i>
+                            <span>{{hours}}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="footer-section footer-newsletter">
+                    <h4>Stay Connected</h4>
+                    <p>Subscribe to our newsletter for health tips and updates.</p>
+                    <form class="newsletter-form" onsubmit="submitNewsletter(event)">
+                        <div class="newsletter-input-group">
+                            <input 
+                                type="email" 
+                                placeholder="Enter your email" 
+                                required 
+                                aria-label="Email address for newsletter"
+                                class="newsletter-input"
+                            >
+                            <button type="submit" class="btn btn-primary newsletter-btn">
+                                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                                Subscribe
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer-bottom">
+        <div class="container">
+            <div class="footer-bottom-content">
+                <div class="footer-legal">
+                    <p>&copy; {{currentYear}} {{practiceTitle}}. All rights reserved.</p>
+                    <div class="footer-links">
+                        <a href="/privacy-policy">Privacy Policy</a>
+                        <a href="/terms-of-service">Terms of Service</a>
+                        <a href="/accessibility">Accessibility</a>
+                        <a href="/hipaa">HIPAA Compliance</a>
+                    </div>
+                </div>
+                
+                <div class="footer-certifications">
+                    {{#if certifications}}
+                    <div class="certifications">
+                        {{#each certifications}}
+                        <div class="certification-badge">
+                            <img src="{{icon}}" alt="{{name}}" title="{{name}}">
+                        </div>
+                        {{/each}}
+                    </div>
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Back to Top Button -->
+    <button class="back-to-top" onclick="scrollToTop()" aria-label="Back to top">
+        <i class="fas fa-chevron-up" aria-hidden="true"></i>
+    </button>
+</footer>
+
+<!-- Emergency Contact Banner (optional) -->
+{{#if showEmergencyBanner}}
+<div class="emergency-banner">
+    <div class="container">
+        <div class="emergency-content">
+            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+            <span>For medical emergencies, please call 911 or visit your nearest emergency room.</span>
+        </div>
+    </div>
+</div>
+{{/if}}

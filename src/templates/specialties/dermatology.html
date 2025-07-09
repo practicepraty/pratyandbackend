@@ -1,0 +1,358 @@
+<!-- Dermatology Template -->
+<div class="specialty-template dermatology">
+    <!-- Hero Section -->
+    <section class="hero-section" role="banner">
+        <div class="hero-background">
+            <div class="hero-overlay"></div>
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">{{heroSection.headline}}</h1>
+                        <p class="hero-subtitle">{{heroSection.subheadline}}</p>
+                        <div class="hero-features">
+                            <div class="feature-item">
+                                <i class="fas fa-microscope" aria-hidden="true"></i>
+                                <span>Advanced Diagnostics</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-hand-holding-medical" aria-hidden="true"></i>
+                                <span>Medical & Cosmetic</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-shield-virus" aria-hidden="true"></i>
+                                <span>Skin Cancer Screening</span>
+                            </div>
+                        </div>
+                        <div class="hero-actions">
+                            <button class="btn btn-primary btn-lg" onclick="scrollToSection('contact')">
+                                <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                                {{heroSection.ctaText}}
+                            </button>
+                            <button class="btn btn-secondary btn-lg" onclick="scrollToSection('services')">
+                                <i class="fas fa-spa" aria-hidden="true"></i>
+                                Our Treatments
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <img src="/images/dermatology-hero.jpg" alt="Dermatology Care" class="hero-img">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section" role="main">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2 class="section-title">{{aboutSection.title}}</h2>
+                    <p class="about-description">{{aboutSection.content}}</p>
+                    
+                    <div class="about-highlights">
+                        {{#each aboutSection.highlights}}
+                        <div class="highlight-item">
+                            <i class="fas fa-check-circle" aria-hidden="true"></i>
+                            <span>{{this}}</span>
+                        </div>
+                        {{/each}}
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">12+</div>
+                            <div class="stat-label">Years Experience</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">4000+</div>
+                            <div class="stat-label">Patients Treated</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">95%</div>
+                            <div class="stat-label">Treatment Success</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="about-image">
+                    <img src="/images/dermatology-about.jpg" alt="Dermatology Team" class="about-img">
+                    <div class="about-badge">
+                        <i class="fas fa-award" aria-hidden="true"></i>
+                        <span>Board Certified</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Comprehensive Dermatology Services</h2>
+                <p class="section-subtitle">Medical and cosmetic treatments for healthy, beautiful skin</p>
+            </div>
+            
+            <div class="services-categories">
+                <div class="service-category">
+                    <h3 class="category-title">
+                        <i class="fas fa-stethoscope" aria-hidden="true"></i>
+                        Medical Dermatology
+                    </h3>
+                    <div class="services-grid">
+                        {{#each services}}
+                        {{#if (eq category "medical")}}
+                        <div class="service-card medical-service">
+                            <div class="service-icon">
+                                <i class="fas fa-{{icon}}" aria-hidden="true"></i>
+                            </div>
+                            <div class="service-content">
+                                <h4 class="service-title">{{name}}</h4>
+                                <p class="service-description">{{description}}</p>
+                                <div class="service-features">
+                                    <span class="feature-tag">Expert Care</span>
+                                    <span class="feature-tag">Advanced Treatment</span>
+                                </div>
+                            </div>
+                        </div>
+                        {{/if}}
+                        {{/each}}
+                    </div>
+                </div>
+                
+                <div class="service-category">
+                    <h3 class="category-title">
+                        <i class="fas fa-spa" aria-hidden="true"></i>
+                        Cosmetic Dermatology
+                    </h3>
+                    <div class="services-grid">
+                        {{#each services}}
+                        {{#if (eq category "cosmetic")}}
+                        <div class="service-card cosmetic-service">
+                            <div class="service-icon">
+                                <i class="fas fa-{{icon}}" aria-hidden="true"></i>
+                            </div>
+                            <div class="service-content">
+                                <h4 class="service-title">{{name}}</h4>
+                                <p class="service-description">{{description}}</p>
+                                <div class="service-features">
+                                    <span class="feature-tag">Natural Results</span>
+                                    <span class="feature-tag">Minimal Downtime</span>
+                                </div>
+                            </div>
+                        </div>
+                        {{/if}}
+                        {{/each}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Treatments Section -->
+    <section class="treatments-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Popular Treatments</h2>
+                <p class="section-subtitle">Our most requested procedures for skin health and beauty</p>
+            </div>
+            
+            <div class="treatments-grid">
+                <div class="treatment-card">
+                    <div class="treatment-image">
+                        <img src="/images/botox-treatment.jpg" alt="Botox Treatment" class="treatment-img">
+                    </div>
+                    <div class="treatment-content">
+                        <h3>Botox & Dermal Fillers</h3>
+                        <p>Reduce fine lines and wrinkles with our FDA-approved injectable treatments.</p>
+                        <div class="treatment-benefits">
+                            <span class="benefit-tag">Quick Procedure</span>
+                            <span class="benefit-tag">Natural Results</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="treatment-card">
+                    <div class="treatment-image">
+                        <img src="/images/laser-treatment.jpg" alt="Laser Treatment" class="treatment-img">
+                    </div>
+                    <div class="treatment-content">
+                        <h3>Laser Skin Resurfacing</h3>
+                        <p>Improve skin texture, reduce scars, and achieve a more youthful appearance.</p>
+                        <div class="treatment-benefits">
+                            <span class="benefit-tag">Minimal Downtime</span>
+                            <span class="benefit-tag">Long-lasting</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="treatment-card">
+                    <div class="treatment-image">
+                        <img src="/images/chemical-peel.jpg" alt="Chemical Peel" class="treatment-img">
+                    </div>
+                    <div class="treatment-content">
+                        <h3>Chemical Peels</h3>
+                        <p>Exfoliate and rejuvenate your skin with customized chemical peel treatments.</p>
+                        <div class="treatment-benefits">
+                            <span class="benefit-tag">Customizable</span>
+                            <span class="benefit-tag">Effective</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skin Cancer Screening Section -->
+    <section class="screening-section">
+        <div class="container">
+            <div class="screening-content">
+                <div class="screening-text">
+                    <h2 class="section-title">Skin Cancer Screening</h2>
+                    <p>Early detection saves lives. Our comprehensive skin cancer screenings use advanced technology to identify potential issues before they become serious.</p>
+                    
+                    <div class="screening-features">
+                        <div class="screening-item">
+                            <i class="fas fa-search" aria-hidden="true"></i>
+                            <div>
+                                <h4>Dermoscopy</h4>
+                                <p>High-powered magnification to examine moles and lesions in detail</p>
+                            </div>
+                        </div>
+                        
+                        <div class="screening-item">
+                            <i class="fas fa-camera" aria-hidden="true"></i>
+                            <div>
+                                <h4>Digital Imaging</h4>
+                                <p>Professional photography to track changes over time</p>
+                            </div>
+                        </div>
+                        
+                        <div class="screening-item">
+                            <i class="fas fa-clipboard-check" aria-hidden="true"></i>
+                            <div>
+                                <h4>Full Body Exam</h4>
+                                <p>Complete head-to-toe examination for early detection</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="screening-cta">
+                        <button class="btn btn-primary" onclick="scrollToSection('contact')">
+                            Schedule Screening
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="screening-image">
+                    <img src="/images/skin-screening.jpg" alt="Skin Cancer Screening" class="screening-img">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Schedule Your Dermatology Consultation</h2>
+                <p class="section-subtitle">Take the first step toward healthy, beautiful skin</p>
+            </div>
+            
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Phone</h3>
+                            <p><a href="tel:{{phone}}">{{phone}}</a></p>
+                            <small>Same-day appointments available</small>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Email</h3>
+                            <p><a href="mailto:{{email}}">{{email}}</a></p>
+                            <small>For general inquiries</small>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Address</h3>
+                            <p>{{address}}</p>
+                            <small>Convenient location</small>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-clock" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Hours</h3>
+                            <p>{{hours}}</p>
+                            <small>Extended hours available</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form-wrapper">
+                    <form class="contact-form" onsubmit="submitContactForm(event)">
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="service">Service Interest</label>
+                            <select id="service" name="service">
+                                <option value="">Select a service</option>
+                                <option value="screening">Skin Cancer Screening</option>
+                                <option value="acne">Acne Treatment</option>
+                                <option value="cosmetic">Cosmetic Dermatology</option>
+                                <option value="medical">Medical Dermatology</option>
+                                <option value="consultation">General Consultation</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="preferred-date">Preferred Date</label>
+                            <input type="date" id="preferred-date" name="preferred-date">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Describe Your Skin Concerns</label>
+                            <textarea id="message" name="message" rows="4" placeholder="Tell us about your skin concerns or questions"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                            Request Consultation
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

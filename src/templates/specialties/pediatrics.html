@@ -1,0 +1,462 @@
+<!-- Pediatrics Template -->
+<div class="specialty-template pediatrics">
+    <!-- Hero Section -->
+    <section class="hero-section" role="banner">
+        <div class="hero-background">
+            <div class="hero-overlay"></div>
+            <div class="container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1 class="hero-title">{{heroSection.headline}}</h1>
+                        <p class="hero-subtitle">{{heroSection.subheadline}}</p>
+                        <div class="hero-features">
+                            <div class="feature-item">
+                                <i class="fas fa-baby" aria-hidden="true"></i>
+                                <span>Infant to Teen Care</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-syringe" aria-hidden="true"></i>
+                                <span>Vaccinations</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-heart" aria-hidden="true"></i>
+                                <span>Compassionate Care</span>
+                            </div>
+                        </div>
+                        <div class="hero-actions">
+                            <button class="btn btn-primary btn-lg" onclick="scrollToSection('contact')">
+                                <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                                {{heroSection.ctaText}}
+                            </button>
+                            <button class="btn btn-secondary btn-lg" onclick="scrollToSection('services')">
+                                <i class="fas fa-child" aria-hidden="true"></i>
+                                Our Services
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <img src="/images/pediatrics-hero.jpg" alt="Pediatric Care" class="hero-img">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section" role="main">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2 class="section-title">{{aboutSection.title}}</h2>
+                    <p class="about-description">{{aboutSection.content}}</p>
+                    
+                    <div class="about-highlights">
+                        {{#each aboutSection.highlights}}
+                        <div class="highlight-item">
+                            <i class="fas fa-check-circle" aria-hidden="true"></i>
+                            <span>{{this}}</span>
+                        </div>
+                        {{/each}}
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">8+</div>
+                            <div class="stat-label">Years Experience</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">2000+</div>
+                            <div class="stat-label">Children Cared For</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">99%</div>
+                            <div class="stat-label">Parent Satisfaction</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="about-image">
+                    <img src="/images/pediatrics-about.jpg" alt="Pediatric Team" class="about-img">
+                    <div class="about-badge">
+                        <i class="fas fa-award" aria-hidden="true"></i>
+                        <span>Board Certified</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Comprehensive Pediatric Care</h2>
+                <p class="section-subtitle">Healthcare services tailored for children from birth to adolescence</p>
+            </div>
+            
+            <div class="services-grid">
+                {{#each services}}
+                <div class="service-card pediatric-service">
+                    <div class="service-icon">
+                        <i class="fas fa-{{icon}}" aria-hidden="true"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3 class="service-title">{{name}}</h3>
+                        <p class="service-description">{{description}}</p>
+                        <div class="service-features">
+                            <span class="feature-tag">Child-Friendly</span>
+                            <span class="feature-tag">Gentle</span>
+                        </div>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </section>
+
+    <!-- Age Groups Section -->
+    <section class="age-groups-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Care for Every Age</h2>
+                <p class="section-subtitle">Specialized care tailored to each developmental stage</p>
+            </div>
+            
+            <div class="age-groups-grid">
+                <div class="age-group-card">
+                    <div class="age-group-icon">
+                        <i class="fas fa-baby" aria-hidden="true"></i>
+                    </div>
+                    <div class="age-group-content">
+                        <h3>Newborns (0-1 month)</h3>
+                        <p>Initial health assessments, feeding guidance, and newborn care education</p>
+                        <ul class="age-group-services">
+                            <li>First wellness visit</li>
+                            <li>Feeding support</li>
+                            <li>Growth monitoring</li>
+                            <li>Parenting guidance</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="age-group-card">
+                    <div class="age-group-icon">
+                        <i class="fas fa-child" aria-hidden="true"></i>
+                    </div>
+                    <div class="age-group-content">
+                        <h3>Infants (1-12 months)</h3>
+                        <p>Regular check-ups, vaccinations, and developmental milestone tracking</p>
+                        <ul class="age-group-services">
+                            <li>Vaccination schedule</li>
+                            <li>Developmental assessments</li>
+                            <li>Nutrition counseling</li>
+                            <li>Safety education</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="age-group-card">
+                    <div class="age-group-icon">
+                        <i class="fas fa-running" aria-hidden="true"></i>
+                    </div>
+                    <div class="age-group-content">
+                        <h3>Toddlers (1-3 years)</h3>
+                        <p>Behavioral guidance, safety education, and continued health monitoring</p>
+                        <ul class="age-group-services">
+                            <li>Behavioral counseling</li>
+                            <li>Injury prevention</li>
+                            <li>Speech development</li>
+                            <li>Toilet training support</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="age-group-card">
+                    <div class="age-group-icon">
+                        <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                    </div>
+                    <div class="age-group-content">
+                        <h3>School Age (4-12 years)</h3>
+                        <p>School physicals, learning assessments, and health maintenance</p>
+                        <ul class="age-group-services">
+                            <li>School physicals</li>
+                            <li>Learning evaluations</li>
+                            <li>Sports clearance</li>
+                            <li>Health education</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="age-group-card">
+                    <div class="age-group-icon">
+                        <i class="fas fa-user-friends" aria-hidden="true"></i>
+                    </div>
+                    <div class="age-group-content">
+                        <h3>Adolescents (13-18 years)</h3>
+                        <p>Confidential care, mental health support, and transition planning</p>
+                        <ul class="age-group-services">
+                            <li>Confidential visits</li>
+                            <li>Mental health screening</li>
+                            <li>Puberty education</li>
+                            <li>College prep physicals</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vaccination Section -->
+    <section class="vaccination-section">
+        <div class="container">
+            <div class="vaccination-content">
+                <div class="vaccination-text">
+                    <h2 class="section-title">Comprehensive Vaccination Program</h2>
+                    <p>We follow the CDC's recommended vaccination schedule to protect your child from serious diseases. Our gentle approach helps reduce anxiety and makes the experience more comfortable for both children and parents.</p>
+                    
+                    <div class="vaccination-features">
+                        <div class="vaccination-item">
+                            <i class="fas fa-calendar-check" aria-hidden="true"></i>
+                            <div>
+                                <h4>On-Schedule Vaccines</h4>
+                                <p>Following CDC guidelines for optimal protection</p>
+                            </div>
+                        </div>
+                        
+                        <div class="vaccination-item">
+                            <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                            <div>
+                                <h4>Safe & Effective</h4>
+                                <p>FDA-approved vaccines with proven safety records</p>
+                            </div>
+                        </div>
+                        
+                        <div class="vaccination-item">
+                            <i class="fas fa-heart" aria-hidden="true"></i>
+                            <div>
+                                <h4>Gentle Approach</h4>
+                                <p>Comfort techniques to minimize stress and pain</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="vaccination-cta">
+                        <button class="btn btn-primary" onclick="scrollToSection('contact')">
+                            Schedule Vaccines
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="vaccination-image">
+                    <img src="/images/vaccination.jpg" alt="Child Vaccination" class="vaccination-img">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Parent Resources Section -->
+    <section class="resources-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Parent Resources</h2>
+                <p class="section-subtitle">Helpful information and tools for raising healthy children</p>
+            </div>
+            
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-book" aria-hidden="true"></i>
+                    </div>
+                    <h3>Health Education</h3>
+                    <p>Age-appropriate health topics, nutrition guides, and safety tips</p>
+                    <a href="#" class="resource-link">Learn More</a>
+                </div>
+                
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-chart-line" aria-hidden="true"></i>
+                    </div>
+                    <h3>Growth Charts</h3>
+                    <p>Track your child's growth and development with our interactive charts</p>
+                    <a href="#" class="resource-link">View Charts</a>
+                </div>
+                
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-phone" aria-hidden="true"></i>
+                    </div>
+                    <h3>24/7 Nurse Line</h3>
+                    <p>Speak with a pediatric nurse for after-hours questions and concerns</p>
+                    <a href="tel:{{nurseLinePhone}}" class="resource-link">Call Now</a>
+                </div>
+                
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-mobile-alt" aria-hidden="true"></i>
+                    </div>
+                    <h3>Patient Portal</h3>
+                    <p>Access medical records, schedule appointments, and message providers</p>
+                    <a href="#" class="resource-link">Log In</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Child-Friendly Environment Section -->
+    <section class="environment-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">A Child-Friendly Environment</h2>
+                <p class="section-subtitle">We've designed our office to be welcoming and comfortable for children</p>
+            </div>
+            
+            <div class="environment-features">
+                <div class="environment-item">
+                    <div class="environment-icon">
+                        <i class="fas fa-gamepad" aria-hidden="true"></i>
+                    </div>
+                    <h3>Interactive Play Area</h3>
+                    <p>Age-appropriate toys and activities to keep children engaged</p>
+                </div>
+                
+                <div class="environment-item">
+                    <div class="environment-icon">
+                        <i class="fas fa-palette" aria-hidden="true"></i>
+                    </div>
+                    <h3>Colorful Décor</h3>
+                    <p>Bright, cheerful colors and child-friendly artwork throughout</p>
+                </div>
+                
+                <div class="environment-item">
+                    <div class="environment-icon">
+                        <i class="fas fa-user-md" aria-hidden="true"></i>
+                    </div>
+                    <h3>Gentle Staff</h3>
+                    <p>Specially trained team members who understand children's needs</p>
+                </div>
+                
+                <div class="environment-item">
+                    <div class="environment-icon">
+                        <i class="fas fa-clock" aria-hidden="true"></i>
+                    </div>
+                    <h3>Minimal Wait Times</h3>
+                    <p>Efficient scheduling to reduce waiting and keep children comfortable</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Schedule Your Child's Appointment</h2>
+                <p class="section-subtitle">We're here to support your child's health and development</p>
+            </div>
+            
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Phone</h3>
+                            <p><a href="tel:{{phone}}">{{phone}}</a></p>
+                            <small>Same-day sick visits available</small>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Email</h3>
+                            <p><a href="mailto:{{email}}">{{email}}</a></p>
+                            <small>Non-urgent inquiries</small>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Address</h3>
+                            <p>{{address}}</p>
+                            <small>Child-friendly facility</small>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <i class="fas fa-clock" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Hours</h3>
+                            <p>{{hours}}</p>
+                            <small>After-hours nurse line available</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form-wrapper">
+                    <form class="contact-form" onsubmit="submitContactForm(event)">
+                        <div class="form-group">
+                            <label for="parent-name">Parent/Guardian Name *</label>
+                            <input type="text" id="parent-name" name="parent-name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="child-name">Child's Name *</label>
+                            <input type="text" id="child-name" name="child-name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="child-age">Child's Age</label>
+                            <input type="number" id="child-age" name="child-age" min="0" max="18">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="visit-type">Visit Type</label>
+                            <select id="visit-type" name="visit-type">
+                                <option value="">Select visit type</option>
+                                <option value="well-child">Well-child checkup</option>
+                                <option value="sick">Sick visit</option>
+                                <option value="vaccine">Vaccination</option>
+                                <option value="physical">School/Sports physical</option>
+                                <option value="consultation">Consultation</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="preferred-date">Preferred Date</label>
+                            <input type="date" id="preferred-date" name="preferred-date">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Concerns or Questions</label>
+                            <textarea id="message" name="message" rows="4" placeholder="Please describe any concerns about your child's health or development"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                            Schedule Appointment
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
