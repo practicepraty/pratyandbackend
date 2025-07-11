@@ -5,7 +5,7 @@ import { ApiError } from "../utils/apierror.js";
 import { ApiResponse } from "../utils/apirespose.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { validatePublishWebsite } from "../middleware/validation.js";
-import { websiteRateLimiter, rateLimiter } from "../middleware/rateLimit.js";
+import rateLimiter from "../middleware/rateLimit.js";
 import publishService from "../services/publishService.js";
 import versionService from "../services/versionService.js";
 
@@ -15,7 +15,7 @@ const router = express.Router();
 router.use(verifyJWT);
 
 // Publish website (make it live)
-router.post("/:id/publish", websiteRateLimiter.publishing, validatePublishWebsite, asyncHandler(async (req, res) => {
+router.post("/:id/publish", rateLimiter.standard, validatePublishWebsite, asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { versionNumber, publishMessage } = req.body;
     
@@ -34,7 +34,7 @@ router.post("/:id/publish", websiteRateLimiter.publishing, validatePublishWebsit
 }));
 
 // Unpublish website (take it offline)
-router.post("/:id/unpublish", websiteRateLimiter.publishing, asyncHandler(async (req, res) => {
+router.post("/:id/unpublish", rateLimiter.standard, asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { reason } = req.body;
     
@@ -128,7 +128,7 @@ router.get("/:id/publish-status", rateLimiter.standard, asyncHandler(async (req,
 }));
 
 // Schedule website publication
-router.post("/:id/schedule-publish", websiteRateLimiter.publishing, asyncHandler(async (req, res) => {
+router.post("/:id/schedule-publish", rateLimiter.standard, asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { scheduledDate, versionNumber, publishMessage } = req.body;
     
@@ -247,7 +247,7 @@ router.get("/:id/analytics", rateLimiter.standard, asyncHandler(async (req, res)
 }));
 
 // Update published website (republish with changes)
-router.put("/:id/republish", websiteRateLimiter.publishing, asyncHandler(async (req, res) => {
+router.put("/:id/republish", rateLimiter.standard, asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { versionNumber, publishMessage } = req.body;
     

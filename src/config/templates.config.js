@@ -331,3 +331,5 @@ export const validateTemplateStructure = (template) => {
   
   return requiredFields.every(field => template.hasOwnProperty(field));
 };
+
+

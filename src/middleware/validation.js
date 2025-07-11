@@ -1,6 +1,7 @@
 // src/middleware/validation.js
-import { body, validationResult } from 'express-validator';
+import { body, param, validationResult } from 'express-validator';
 import { ApiError } from '../utils/apierror.js';
+import mongoose from 'mongoose';
 
 // Validation middleware for website updates
 export const validateWebsiteUpdate = [
@@ -302,7 +303,6 @@ export const validatePublishWebsite = [
 
 // General validation helper functions
 export const validateObjectId = (id) => {
-    const mongoose = require('mongoose');
     return mongoose.Types.ObjectId.isValid(id);
 };
 
@@ -353,4 +353,228 @@ export const sanitizeEmail = (email) => {
 
 export const sanitizePhone = (phone) => {
     return phone.replace(/[^\d\+\-\(\)\s]/g, '');
+};
+
+// Validation middleware for audio transcription
+export const validateAudioTranscription = [
+    body('language')
+        .optional()
+        .isString()
+        .isLength({ min: 2, max: 5 })
+        .withMessage('Language code must be between 2 and 5 characters'),
+    
+    body('speakerLabels')
+        .optional()
+        .isBoolean()
+        .withMessage('Speaker labels must be a boolean value'),
+    
+    body('expectedSpeakers')
+        .optional()
+        .isInt({ min: 1, max: 10 })
+        .withMessage('Expected speakers must be between 1 and 10'),
+    
+    body('autoHighlights')
+        .optional()
+        .isBoolean()
+        .withMessage('Auto highlights must be a boolean value'),
+    
+    body('saveToDatabase')
+        .optional()
+        .isBoolean()
+        .withMessage('Save to database must be a boolean value'),
+    
+    // Custom validation for audio file
+    (req, res, next) => {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                error: {
+                    code: 'MISSING_AUDIO_FILE',
+                    message: 'Audio file is required'
+                }
+            });
+        }
+        
+        const supportedFormats = ['.mp3', '.wav', '.m4a', '.flac', '.ogg', '.webm'];
+        const fileExtension = req.file.originalname.split('.').pop().toLowerCase();
+        
+        if (!supportedFormats.includes(`.${fileExtension}`)) {
+            return res.status(400).json({
+                success: false,
+                error: {
+                    code: 'UNSUPPORTED_AUDIO_FORMAT',
+                    message: `Unsupported audio format: .${fileExtension}. Supported formats: ${supportedFormats.join(', ')}`
+                }
+            });
+        }
+        
+        // Check file size (25MB limit)
+        const maxSizeInBytes = 25 * 1024 * 1024;
+        if (req.file.size > maxSizeInBytes) {
+            return res.status(400).json({
+                success: false,
+                error: {
+                    code: 'FILE_TOO_LARGE',
+                    message: 'Audio file size exceeds 25MB limit'
+                }
+            });
+        }
+        
+        next();
+    },
+    
+    // Standard validation result handler
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const errorMessages = errors.array().map(error => ({
+                field: error.path,
+                message: error.msg,
+                value: error.value
+            }));
+            
+            throw new ApiError(400, 'Validation failed', errorMessages);
+        }
+        next();
+    }
+];
+
+// Validation middleware for generate from audio
+export const validateGenerateFromAudio = [
+    body('language')
+        .optional()
+        .isString()
+        .isLength({ min: 2, max: 5 })
+        .withMessage('Language code must be between 2 and 5 characters'),
+    
+    body('speakerLabels')
+        .optional()
+        .isBoolean()
+        .withMessage('Speaker labels must be a boolean value'),
+    
+    body('expectedSpeakers')
+        .optional()
+        .isInt({ min: 1, max: 10 })
+        .withMessage('Expected speakers must be between 1 and 10'),
+    
+    body('autoHighlights')
+        .optional()
+        .isBoolean()
+        .withMessage('Auto highlights must be a boolean value'),
+    
+    body('saveToDatabase')
+        .optional()
+        .isBoolean()
+        .withMessage('Save to database must be a boolean value'),
+    
+    // Custom validation for audio file
+    (req, res, next) => {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                error: {
+                    code: 'MISSING_AUDIO_FILE',
+                    message: 'Audio file is required'
+                }
+            });
+        }
+        
+        const supportedFormats = ['.mp3', '.wav', '.m4a', '.flac', '.ogg', '.webm'];
+        const fileExtension = req.file.originalname.split('.').pop().toLowerCase();
+        
+        if (!supportedFormats.includes(`.${fileExtension}`)) {
+            return res.status(400).json({
+                success: false,
+                error: {
+                    code: 'UNSUPPORTED_AUDIO_FORMAT',
+                    message: `Unsupported audio format: .${fileExtension}. Supported formats: ${supportedFormats.join(', ')}`
+                }
+            });
+        }
+        
+        // Check file size (25MB limit)
+        const maxSizeInBytes = 25 * 1024 * 1024;
+        if (req.file.size > maxSizeInBytes) {
+            return res.status(400).json({
+                success: false,
+                error: {
+                    code: 'FILE_TOO_LARGE',
+                    message: 'Audio file size exceeds 25MB limit'
+                }
+            });
+        }
+        
+        next();
+    },
+    
+    // Standard validation result handler
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const errorMessages = errors.array().map(error => ({
+                field: error.path,
+                message: error.msg,
+                value: error.value
+            }));
+            
+            throw new ApiError(400, 'Validation failed', errorMessages);
+        }
+        next();
+    }
+];
+
+// Validation middleware for transcription job ID
+export const validateTranscriptionJobId = [
+    param('jobId')
+        .notEmpty()
+        .withMessage('Job ID is required')
+        .isString()
+        .isLength({ min: 10, max: 50 })
+        .withMessage('Job ID must be between 10 and 50 characters'),
+    
+    // Validation result handler
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const errorMessages = errors.array().map(error => ({
+                field: error.path,
+                message: error.msg,
+                value: error.value
+            }));
+            
+            throw new ApiError(400, 'Validation failed', errorMessages);
+        }
+        next();
+    }
+];
+
+// Helper functions for audio validation
+export const validateAudioFile = (file) => {
+    if (!file) {
+        throw new ApiError(400, 'Audio file is required');
+    }
+    
+    const supportedFormats = ['.mp3', '.wav', '.m4a', '.flac', '.ogg', '.webm'];
+    const fileExtension = file.originalname.split('.').pop().toLowerCase();
+    
+    if (!supportedFormats.includes(`.${fileExtension}`)) {
+        throw new ApiError(400, `Unsupported audio format: .${fileExtension}. Supported formats: ${supportedFormats.join(', ')}`);
+    }
+    
+    // Check file size (25MB limit)
+    const maxSizeInBytes = 25 * 1024 * 1024;
+    if (file.size > maxSizeInBytes) {
+        throw new ApiError(400, 'Audio file size exceeds 25MB limit');
+    }
+    
+    return true;
+};
+
+export const validateLanguageCode = (languageCode) => {
+    const supportedLanguages = [
+        'en', 'es', 'fr', 'de', 'it', 'pt', 'nl', 'hi', 'ja', 'zh', 
+        'ko', 'ru', 'ar', 'tr', 'pl', 'uk'
+    ];
+    
+    return supportedLanguages.includes(languageCode.toLowerCase());
 };

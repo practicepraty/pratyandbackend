@@ -1,9 +1,11 @@
+
+
 import nodemailer from 'nodemailer';
 
 // Create transporter
 const createTransporter = () => {
   // For development, you can use Gmail or any SMTP service
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: process.env.SMTP_PORT || 587,
     secure: false, // true for 465, false for other ports

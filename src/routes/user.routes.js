@@ -6,7 +6,11 @@ import {
   logoutUser, 
   forgotPassword, 
   resetPassword, 
-  verifyResetToken 
+  verifyResetToken,
+  getCurrentUser,
+  updateUserProfile,
+  changePassword,
+  refreshAccessToken
 } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -37,5 +41,9 @@ router.route("/verify-reset-token/:token").get(verifyResetToken)
 
 // Secured routes
 router.route("/logout").post(verifyJWT, logoutUser)
+router.route("/current-user").get(verifyJWT, getCurrentUser)
+router.route("/update-profile").put(verifyJWT, updateUserProfile)
+router.route("/change-password").post(verifyJWT, changePassword)
+router.route("/refresh-token").post(refreshAccessToken)
 
 export default router;

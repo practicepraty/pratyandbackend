@@ -1,0 +1,53 @@
+{
+  "personal": {
+    "title": "Dr.",
+    "firstName": "John",
+    "lastName": "Doe",
+    "professionalEmail": "john.doe@test.com",
+    "phone": "555-1234",
+    "dateOfBirth": "1980-01-01",
+    "gender": "Male"
+  },
+  "professional": {
+    "specialty": "Internal Medicine",
+    "subSpecialty": "Cardiology",
+    "licenseNumber": "12345",
+    "licenseState": "CA",
+    "licenseExpiryDate": "2025-12-31",
+    "yearsOfExperience": 10,
+    "medicalSchool": "Test Medical School",
+    "graduationYear": 2010
+  },
+  "residency": {
+    "residencyProgram": "Internal Medicine",
+    "residencyInstitution": "Test Hospital",
+    "residencyCompletionYear": 2013
+  },
+  "fellowship": {
+    "fellowshipProgram": "Cardiology",
+    "fellowshipInstitution": "Test Medical Center",
+    "fellowshipCompletionYear": 2015
+  },
+  "certifications": {
+    "boardCertifications": ["Internal Medicine", "Cardiology"]
+  },
+  "practice": {
+    "practiceType": "Hospital",
+    "institutionName": "Test Medical Center"
+  },
+  "address": {
+    "street": "123 Main St",
+    "city": "Los Angeles",
+    "state": "CA",
+    "zipCode": "90210",
+    "country": "USA"
+  },
+  "schedule": {
+    "officeHours": "9AM-5PM",
+    "languages": ["English"],
+    "insuranceAccepted": ["Medicare", "Medicaid"]
+  },
+  "account": {
+    "password": "TestPass123"
+  }
+}

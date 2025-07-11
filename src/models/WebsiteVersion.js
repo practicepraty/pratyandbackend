@@ -1,5 +1,6 @@
 // src/models/WebsiteVersion.js
 import mongoose from "mongoose";
+import crypto from "crypto";
 
 // Website Version Schema for tracking all versions
 const websiteVersionSchema = new mongoose.Schema({
@@ -190,7 +191,6 @@ websiteVersionSchema.pre('save', function(next) {
 
 // Instance method to calculate content hash
 websiteVersionSchema.methods.calculateContentHash = function() {
-  const crypto = require('crypto');
   const contentString = JSON.stringify(this.content);
   return crypto.createHash('sha256').update(contentString).digest('hex');
 };

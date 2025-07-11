@@ -6,7 +6,7 @@ import { ApiResponse } from "../utils/apirespose.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import websiteService from "../services/websiteService.js";
 import { validateWebsiteUpdate } from "../middleware/validation.js";
-import { rateLimiter } from "../middleware/rateLimit.js";
+import rateLimiter from "../middleware/rateLimit.js";
 
 const router = express.Router();
 

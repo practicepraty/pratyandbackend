@@ -70,7 +70,7 @@ const registerUser = asyncHandler(async (req, res) => {
   if (!userData.professional.specialty?.trim()) throw new ApiError(400, "Specialty is required");
   if (!userData.professional.licenseNumber?.trim()) throw new ApiError(400, "License number is required");
   if (!userData.professional.licenseState?.trim()) throw new ApiError(400, "License state is required");
-  if (!userData.professional.yearsOfExperience?.trim()) throw new ApiError(400, "Years of experience is required");
+  if (!userData.professional.yearsOfExperience) throw new ApiError(400, "Years of experience is required");
   if (!userData.professional.medicalSchool?.trim()) throw new ApiError(400, "Medical school is required");
 
   if (!userData.practice.practiceType?.trim()) throw new ApiError(400, "Practice type is required");
@@ -642,8 +642,31 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     throw new ApiError(404, "User not found");
   }
 
+  // Check if this is a new user and add helpful guidance
+  const isNewUser = new Date() - user.createdAt < 24 * 60 * 60 * 1000; // Less than 24 hours
+  const hasWebsites = user.websiteCount > 0; // Assuming this field exists or will be added
+
+  const response = {
+    user: user,
+    user_guidance: {
+      is_new_user: isNewUser,
+      has_websites: hasWebsites,
+      next_steps: isNewUser ? [
+        "Complete your profile to get personalized website suggestions",
+        "Upload an audio recording describing your practice",
+        "Generate your first professional medical website",
+        "Explore customization options for your website"
+      ] : [],
+      tips: [
+        "Use specific medical terminology in your descriptions for better AI generation",
+        "Include your specialties, services, and unique qualifications",
+        "Consider adding patient testimonials or success stories"
+      ]
+    }
+  };
+
   res.status(200).json(
-    new ApiResponse(200, user, "User profile fetched successfully")
+    new ApiResponse(200, response, isNewUser ? "Welcome! Here are some next steps to get started." : "User profile fetched successfully")
   );
 });
 

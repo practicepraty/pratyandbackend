@@ -347,6 +347,22 @@ const websiteSchema = new mongoose.Schema({
     required: true
   },
   
+  // Transcription tracking
+  transcriptionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Transcription',
+    index: true
+  },
+  assemblyJobId: {
+    type: String,
+    index: true
+  },
+  transcriptionSource: {
+    type: String,
+    enum: ['manual', 'audio_transcription', 'imported'],
+    default: 'manual'
+  },
+  
   // Template Generation Fields
   generatedHtml: {
     type: String,

@@ -2,6 +2,8 @@ import mongoose from "mongoose"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import crypto from "crypto"
+import argon2 from "argon2"
+import { encryptData, decryptData } from "../middlewares/security.middleware.js"
 
 const UserSchema = new mongoose.Schema({
 
@@ -205,30 +207,109 @@ const UserSchema = new mongoose.Schema({
 
   // Account Information
   accountInfo: {
-  password: {
-    type: String,
-    required: [true, 'Password is required'],
-    minlength: [8, 'Password must be at least 8 characters'],
-    select: false
-  },
-  refreshToken: {
-    type: String,
-  },
-  // ADD THESE NEW FIELDS FOR PASSWORD RECOVERY
-  passwordResetToken: {
-    type: String,
-    select: false
-  },
-  passwordResetExpires: {
-    type: Date,
-    select: false
-  },
-  passwordResetUsed: {
-    type: Boolean,
-    default: false,
-    select: false
+    password: {
+      type: String,
+      required: [true, 'Password is required'],
+      minlength: [12, 'Password must be at least 12 characters'],
+      select: false,
+      validate: {
+        validator: function(v) {
+          // Strong password: min 12 chars, uppercase, lowercase, number, special char
+          return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/.test(v);
+        },
+        message: 'Password must contain at least 12 characters with uppercase, lowercase, number, and special character'
+      }
+    },
+    refreshToken: {
+      type: String,
+      select: false
+    },
+    // Password Recovery
+    passwordResetToken: {
+      type: String,
+      select: false
+    },
+    passwordResetExpires: {
+      type: Date,
+      select: false
+    },
+    passwordResetUsed: {
+      type: Boolean,
+      default: false,
+      select: false
+    },
+    // MFA Configuration
+    mfaEnabled: {
+      type: Boolean,
+      default: false
+    },
+    mfaSecret: {
+      type: String,
+      select: false
+    },
+    mfaBackupCodes: {
+      type: [String],
+      select: false
+    },
+    mfaSetupDate: {
+      type: Date
+    },
+    // Security Settings
+    loginAttempts: {
+      type: Number,
+      default: 0
+    },
+    lockUntil: {
+      type: Date
+    },
+    lastLogin: {
+      type: Date
+    },
+    lastPasswordChange: {
+      type: Date,
+      default: Date.now
+    },
+    passwordHistory: {
+      type: [String],
+      select: false,
+      default: []
+    },
+    // Session Management
+    activeSessions: [{
+      sessionId: String,
+      deviceInfo: String,
+      ipAddress: String,
+      createdAt: { type: Date, default: Date.now },
+      lastAccessed: { type: Date, default: Date.now }
+    }],
+    // Consent and Privacy
+    consentGiven: {
+      type: Boolean,
+      default: false
+    },
+    consentDate: {
+      type: Date
+    },
+    privacyPolicyAccepted: {
+      type: Boolean,
+      default: false
+    },
+    privacyPolicyDate: {
+      type: Date
+    },
+    // Data retention
+    dataRetentionConsent: {
+      type: Boolean,
+      default: true
+    },
+    accountDeletionRequested: {
+      type: Boolean,
+      default: false
+    },
+    accountDeletionDate: {
+      type: Date
+    }
   }
-}
 },
 {
   timestamps: true,
@@ -237,10 +318,30 @@ const UserSchema = new mongoose.Schema({
 })
 
 UserSchema.pre("save", async function (next) {
-    if(!this.isModified("accountInfo.password")) return next(); // Fixed: correct path
+    if(!this.isModified("accountInfo.password")) return next();
 
-    this.accountInfo.password = await bcrypt.hash(this.accountInfo.password, 10) // Fixed: correct path
-    next()
+    // Store previous password in history
+    if (this.accountInfo.password && this.isModified("accountInfo.password")) {
+      if (!this.accountInfo.passwordHistory) {
+        this.accountInfo.passwordHistory = [];
+      }
+      // Keep last 5 passwords
+      if (this.accountInfo.passwordHistory.length >= 5) {
+        this.accountInfo.passwordHistory.shift();
+      }
+      this.accountInfo.passwordHistory.push(this.accountInfo.password);
+    }
+
+    // Use Argon2 for password hashing (more secure than bcrypt)
+    this.accountInfo.password = await argon2.hash(this.accountInfo.password, {
+      type: argon2.argon2id,
+      memoryCost: 2 ** 16,
+      timeCost: 3,
+      parallelism: 1,
+    });
+    
+    this.accountInfo.lastPasswordChange = new Date();
+    next();
 })
 
 UserSchema.methods.generatePasswordResetToken = function() {
@@ -277,7 +378,54 @@ UserSchema.methods.verifyPasswordResetToken = function(token) {
 };
 
 UserSchema.methods.isPasswordCorrect = async function(password){
-    return await bcrypt.compare(password, this.accountInfo.password) // Fixed: correct path
+    try {
+      return await argon2.verify(this.accountInfo.password, password);
+    } catch (error) {
+      return false;
+    }
+}
+
+// Check if password was used before
+UserSchema.methods.isPasswordReused = async function(password) {
+  if (!this.accountInfo.passwordHistory) return false;
+  
+  for (const oldPassword of this.accountInfo.passwordHistory) {
+    try {
+      const isMatch = await argon2.verify(oldPassword, password);
+      if (isMatch) return true;
+    } catch (error) {
+      continue;
+    }
+  }
+  return false;
+}
+
+// Account lockout methods
+UserSchema.methods.isAccountLocked = function() {
+  return !!(this.accountInfo.lockUntil && this.accountInfo.lockUntil > Date.now());
+}
+
+UserSchema.methods.incLoginAttempts = async function() {
+  if (this.accountInfo.lockUntil && this.accountInfo.lockUntil < Date.now()) {
+    return this.updateOne({
+      $unset: { 'accountInfo.lockUntil': 1 },
+      $set: { 'accountInfo.loginAttempts': 1 }
+    });
+  }
+  
+  const updates = { $inc: { 'accountInfo.loginAttempts': 1 } };
+  
+  if (this.accountInfo.loginAttempts + 1 >= 5 && !this.accountInfo.lockUntil) {
+    updates.$set = { 'accountInfo.lockUntil': Date.now() + 30 * 60 * 1000 }; // 30 minutes
+  }
+  
+  return this.updateOne(updates);
+}
+
+UserSchema.methods.resetLoginAttempts = async function() {
+  return this.updateOne({
+    $unset: { 'accountInfo.loginAttempts': 1, 'accountInfo.lockUntil': 1 }
+  });
 }
 
 UserSchema.methods.generateAccessToken = function(){

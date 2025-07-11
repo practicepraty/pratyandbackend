@@ -4,7 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apierror.js";
 import { ApiResponse } from "../utils/apirespose.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-import { rateLimiter } from "../middleware/rateLimit.js";
+import rateLimiter from "../middleware/rateLimit.js";
 import versionService from "../services/versionService.js";
 
 const router = express.Router();
