@@ -7,21 +7,6 @@ import { sendPasswordResetEmail, sendPasswordResetConfirmationEmail } from "../u
 import crypto from "crypto";
 import jwt from "jsonwebtoken"; // Added missing import
 
-// Helper function to extract fields from request body
-const extractFields = (body, expectedFields) => {
-  const result = {};
-  
-  for (const [category, fields] of Object.entries(expectedFields)) {
-    result[category] = {};
-    for (const field of fields) {
-      if (body[field] !== undefined) {
-        result[category][field] = body[field];
-      }
-    }
-  }
-  
-  return result;
-};
 
 // Helper function to generate tokens
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -45,49 +30,126 @@ const generateAccessAndRefreshTokens = async (userId) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  const expectedFields = {
-    personal: ['title', 'firstName', 'lastName', 'professionalEmail', 'phone', 'dateOfBirth', 'gender'],
-    professional: ['specialty', 'subSpecialty', 'licenseNumber', 'licenseState', 'licenseExpiryDate', 'yearsOfExperience', 'medicalSchool', 'graduationYear'],
-    residency: ['residencyProgram', 'residencyInstitution', 'residencyCompletionYear'],
-    fellowship: ['fellowshipProgram', 'fellowshipInstitution', 'fellowshipCompletionYear'],
-    certifications: ['boardCertifications'],
-    practice: ['practiceType', 'institutionName'],
-    address: ['street', 'city', 'state', 'zipCode', 'country'],
-    schedule: ['officeHours', 'languages', 'insuranceAccepted'],
-    account: ['password']
-  };
+  // Enhanced debug logging to understand incoming data structure
+  console.log('=== REGISTRATION DEBUG START ===');
+  console.log('Full req.body:', JSON.stringify(req.body, null, 2));
+  console.log('Request body keys:', Object.keys(req.body));
+  console.log('Request body type:', typeof req.body);
+  console.log('Request body length:', JSON.stringify(req.body).length);
+  
+  // Check for nested structures
+  Object.keys(req.body).forEach(key => {
+    const value = req.body[key];
+    console.log(`${key}:`, typeof value, Array.isArray(value) ? '[Array]' : '', value);
+  });
+  
+  console.log('Sample field values:', {
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    professionalEmail: req.body.professionalEmail,
+    phone: req.body.phone,
+    street: req.body.street,
+    city: req.body.city,
+    state: req.body.state,
+    specialty: req.body.specialty,
+    password: req.body.password ? '[PRESENT]' : '[MISSING]'
+  });
+  console.log('=== REGISTRATION DEBUG END ===');
 
-  const userData = extractFields(req.body, expectedFields);
+  // Extract fields directly from req.body (expecting flat structure)
+  const {
+    // Personal info
+    title,
+    firstName,
+    lastName,
+    professionalEmail,
+    phone,
+    dateOfBirth,
+    gender,
+    
+    // Professional info
+    specialty,
+    subSpecialty,
+    licenseNumber,
+    licenseState,
+    licenseExpiryDate,
+    yearsOfExperience,
+    medicalSchool,
+    graduationYear,
+    
+    // Residency info
+    residencyProgram,
+    residencyInstitution,
+    residencyCompletionYear,
+    
+    // Fellowship info
+    fellowshipProgram,
+    fellowshipInstitution,
+    fellowshipCompletionYear,
+    
+    // Certifications
+    boardCertifications,
+    
+    // Practice info
+    practiceType,
+    institutionName,
+    
+    // Address info
+    street,
+    city,
+    state,
+    zipCode,
+    country,
+    latitude,
+    longitude,
+    
+    // Schedule info
+    officeHours,
+    languages,
+    insuranceAccepted,
+    
+    // Account info
+    password
+  } = req.body;
 
-  // Validation for required fields
-  if (!userData.personal.firstName?.trim()) throw new ApiError(400, "First name is required");
-  if (!userData.personal.lastName?.trim()) throw new ApiError(400, "Last name is required");
-  if (!userData.personal.professionalEmail?.trim()) throw new ApiError(400, "Email is required");
-  if (!userData.personal.phone?.trim()) throw new ApiError(400, "Phone is required");
-  if (!userData.personal.dateOfBirth) throw new ApiError(400, "Date of birth is required");
-  if (!userData.personal.gender?.trim()) throw new ApiError(400, "Gender is required");
+  // Enhanced validation for required fields with better error messages
+  console.log('Validating required fields...');
+  
+  // Personal Info validation
+  if (!firstName?.trim()) throw new ApiError(400, "First name is required");
+  if (!lastName?.trim()) throw new ApiError(400, "Last name is required");
+  if (!professionalEmail?.trim()) throw new ApiError(400, "Professional email is required");
+  if (!phone?.trim()) throw new ApiError(400, "Phone number is required");
+  if (!dateOfBirth?.trim()) throw new ApiError(400, "Date of birth is required");
+  if (!gender?.trim()) throw new ApiError(400, "Gender is required");
 
-  if (!userData.professional.specialty?.trim()) throw new ApiError(400, "Specialty is required");
-  if (!userData.professional.licenseNumber?.trim()) throw new ApiError(400, "License number is required");
-  if (!userData.professional.licenseState?.trim()) throw new ApiError(400, "License state is required");
-  if (!userData.professional.yearsOfExperience) throw new ApiError(400, "Years of experience is required");
-  if (!userData.professional.medicalSchool?.trim()) throw new ApiError(400, "Medical school is required");
+  // Professional Info validation
+  if (!specialty?.trim()) throw new ApiError(400, "Medical specialty is required");
+  if (!licenseNumber?.trim()) throw new ApiError(400, "License number is required");
+  if (!licenseState?.trim()) throw new ApiError(400, "License state is required");
+  if (!yearsOfExperience?.trim()) throw new ApiError(400, "Years of experience is required");
+  if (!medicalSchool?.trim()) throw new ApiError(400, "Medical school is required");
 
-  if (!userData.practice.practiceType?.trim()) throw new ApiError(400, "Practice type is required");
-  if (!userData.practice.institutionName?.trim()) throw new ApiError(400, "Institution name is required");
+  // Practice Info validation
+  if (!practiceType?.trim()) throw new ApiError(400, "Practice type is required");
+  if (!institutionName?.trim()) throw new ApiError(400, "Institution name is required");
 
-  if (!userData.address.street?.trim()) throw new ApiError(400, "Street is required");
-  if (!userData.address.city?.trim()) throw new ApiError(400, "City is required");
-  if (!userData.address.state?.trim()) throw new ApiError(400, "State is required");
-  if (!userData.address.zipCode?.trim()) throw new ApiError(400, "ZIP code is required");
+  // Address validation
+  if (!street?.trim()) throw new ApiError(400, "Street address is required");
+  if (!city?.trim()) throw new ApiError(400, "City is required");
+  if (!state?.trim()) throw new ApiError(400, "State is required");
+  if (!zipCode?.trim()) throw new ApiError(400, "ZIP code is required");
 
-  if (!userData.account.password?.trim()) throw new ApiError(400, "Password is required");
+  // Account validation
+  if (!password?.trim()) throw new ApiError(400, "Password is required");
+  
+  console.log('All required fields validated successfully');
   
   // Check if user already exists
   const existedUser = await User.findOne({
     $or: [
-      { 'personalInfo.phone': userData.personal.phone },
-      { 'personalInfo.professionalEmail': userData.personal.professionalEmail.toLowerCase().trim() }
+      { 'personalInfo.phone': phone },
+      { 'personalInfo.professionalEmail': professionalEmail.toLowerCase().trim() }
     ]
   });
 
@@ -102,12 +164,43 @@ const registerUser = asyncHandler(async (req, res) => {
   let profilePhoto = null;
   let cv = null;
 
-  if (profilePhotoLocalPath) {
-    profilePhoto = await uploadOnCloudinary(profilePhotoLocalPath);
-  }
+  try {
+    if (profilePhotoLocalPath) {
+      profilePhoto = await uploadOnCloudinary(profilePhotoLocalPath);
+      if (!profilePhoto) {
+        throw new ApiError(400, "Failed to upload profile photo. Please try again with a different image.");
+      }
+    }
 
-  if (cvLocalPath) {
-    cv = await uploadOnCloudinary(cvLocalPath);
+    if (cvLocalPath) {
+      cv = await uploadOnCloudinary(cvLocalPath);
+      if (!cv) {
+        throw new ApiError(400, "Failed to upload CV. Please try again with a different file.");
+      }
+    }
+  } catch (error) {
+    // Clean up any uploaded files on error
+    if (profilePhotoLocalPath) {
+      try {
+        const fs = await import('fs');
+        fs.unlinkSync(profilePhotoLocalPath);
+      } catch (cleanupError) {
+        console.error('Error cleaning up profile photo:', cleanupError);
+      }
+    }
+    if (cvLocalPath) {
+      try {
+        const fs = await import('fs');
+        fs.unlinkSync(cvLocalPath);
+      } catch (cleanupError) {
+        console.error('Error cleaning up CV:', cleanupError);
+      }
+    }
+    
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(400, "File upload failed. Please try again.");
   }
 
   // Parse arrays and objects from request body
@@ -133,61 +226,61 @@ const registerUser = asyncHandler(async (req, res) => {
     return typeof field === 'object' ? field : {};
   };
 
-  // Create user with proper schema structure
+  // Create user with proper schema structure (using flat field names)
   const user = await User.create({
     personalInfo: {
-      title: userData.personal.title,
-      firstName: userData.personal.firstName,
-      lastName: userData.personal.lastName,
-      fullName: `${userData.personal.firstName} ${userData.personal.lastName}`,
-      professionalEmail: userData.personal.professionalEmail.toLowerCase().trim(),
-      phone: userData.personal.phone,
-      dateOfBirth: userData.personal.dateOfBirth,
-      gender: userData.personal.gender,
+      title: title,
+      firstName: firstName,
+      lastName: lastName,
+      fullName: `${firstName} ${lastName}`,
+      professionalEmail: professionalEmail.toLowerCase().trim(),
+      phone: phone,
+      dateOfBirth: dateOfBirth,
+      gender: gender,
       profilePhoto: profilePhoto?.url || ""
     },
     professionalInfo: {
-      specialty: userData.professional.specialty,
-      subSpecialty: userData.professional.subSpecialty,
-      licenseNumber: userData.professional.licenseNumber,
-      licenseState: userData.professional.licenseState,
-      licenseExpiryDate: userData.professional.licenseExpiryDate ? new Date(userData.professional.licenseExpiryDate) : undefined,
-      yearsOfExperience: userData.professional.yearsOfExperience,
-      medicalSchool: userData.professional.medicalSchool,
-      graduationYear: userData.professional.graduationYear ? parseInt(userData.professional.graduationYear) : undefined,
+      specialty: specialty,
+      subSpecialty: subSpecialty,
+      licenseNumber: licenseNumber,
+      licenseState: licenseState,
+      licenseExpiryDate: licenseExpiryDate ? new Date(licenseExpiryDate) : undefined,
+      yearsOfExperience: yearsOfExperience,
+      medicalSchool: medicalSchool,
+      graduationYear: graduationYear ? parseInt(graduationYear) : undefined,
       residency: {
-        program: userData.residency.residencyProgram,
-        institution: userData.residency.residencyInstitution,
-        completionYear: userData.residency.residencyCompletionYear ? parseInt(userData.residency.residencyCompletionYear) : undefined
+        program: residencyProgram,
+        institution: residencyInstitution,
+        completionYear: residencyCompletionYear ? parseInt(residencyCompletionYear) : undefined
       },
       fellowship: {
-        program: userData.fellowship.fellowshipProgram,
-        institution: userData.fellowship.fellowshipInstitution,
-        completionYear: userData.fellowship.fellowshipCompletionYear ? parseInt(userData.fellowship.fellowshipCompletionYear) : undefined
+        program: fellowshipProgram,
+        institution: fellowshipInstitution,
+        completionYear: fellowshipCompletionYear ? parseInt(fellowshipCompletionYear) : undefined
       },
-      boardCertifications: parseArrayField(userData.certifications.boardCertifications),
+      boardCertifications: parseArrayField(boardCertifications),
       cv: cv?.url || ""
     },
     practiceInfo: {
-      practiceType: userData.practice.practiceType,
-      institutionName: userData.practice.institutionName,
+      practiceType: practiceType,
+      institutionName: institutionName,
       address: {
-        street: userData.address.street,
-        city: userData.address.city,
-        state: userData.address.state,
-        zipCode: userData.address.zipCode,
-        country: userData.address.country || 'IN',
+        street: street,
+        city: city,
+        state: state,
+        zipCode: zipCode,
+        country: country || 'IN',
         coordinates: {
-          latitude: userData.address.latitude ? parseFloat(userData.address.latitude) : undefined,
-          longitude: userData.address.longitude ? parseFloat(userData.address.longitude) : undefined
+          latitude: latitude ? parseFloat(latitude) : undefined,
+          longitude: longitude ? parseFloat(longitude) : undefined
         }
       },
-      officeHours: parseObjectField(userData.schedule.officeHours),
-      languages: parseArrayField(userData.schedule.languages),
-      insuranceAccepted: parseArrayField(userData.schedule.insuranceAccepted)
+      officeHours: parseObjectField(officeHours),
+      languages: parseArrayField(languages),
+      insuranceAccepted: parseArrayField(insuranceAccepted)
     },
     accountInfo: {
-      password: userData.account.password
+      password: password
     }
   });
 
@@ -258,7 +351,9 @@ const loginUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+    path: '/',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
   };
 
   return res.status(200)
@@ -289,7 +384,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+    path: '/'
   };
 
   return res
@@ -326,7 +422,9 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     const options = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
     };
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
@@ -646,7 +744,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   const isNewUser = new Date() - user.createdAt < 24 * 60 * 60 * 1000; // Less than 24 hours
   const hasWebsites = user.websiteCount > 0; // Assuming this field exists or will be added
 
-  const response = {
+  const responseData = {
     user: user,
     user_guidance: {
       is_new_user: isNewUser,
@@ -666,7 +764,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   };
 
   res.status(200).json(
-    new ApiResponse(200, response, isNewUser ? "Welcome! Here are some next steps to get started." : "User profile fetched successfully")
+    new ApiResponse(200, responseData, isNewUser ? "Welcome! Here are some next steps to get started." : "User profile fetched successfully")
   );
 });
 

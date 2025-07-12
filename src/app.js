@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser"
 import session from "express-session"
 import MongoStore from "connect-mongo"
 import { errorHandler } from "./middlewares/errorHandler.middleware.js";
+import { handleMulterError } from "./middlewares/multer.middleware.js";
 import { 
   helmetConfig,
   generalRateLimit,
@@ -82,13 +83,21 @@ app.use(session({
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     maxAge: 1000 * 60 * 60 * 24, // 24 hours
-    sameSite: 'strict' // CSRF protection
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // Allow cross-origin in dev
+    domain: process.env.NODE_ENV === 'production' ? undefined : undefined
   },
   rolling: true // Reset expiry on activity
 }));
 
-// CSRF protection middleware
-app.use(csrfProtection);
+// CSRF protection middleware with bypass for development routes
+app.use((req, res, next) => {
+  // Skip CSRF for development routes (when NODE_ENV is not production)
+  if (process.env.NODE_ENV !== 'production' && req.path.includes('-dev')) {
+    console.log('Skipping CSRF for development route:', req.path);
+    return next();
+  }
+  return csrfProtection(req, res, next);
+});
 app.use(provideCsrfToken);
 
 // CORS configuration with enhanced security
@@ -100,7 +109,13 @@ app.use(cors({
             origin.startsWith('http://localhost:') || 
             origin.startsWith('http://127.0.0.1:') ||
             origin.startsWith('https://localhost:') ||
-            origin.startsWith('https://127.0.0.1:')) {
+            origin.startsWith('https://127.0.0.1:') ||
+            origin === 'http://localhost:5173' ||
+            origin === 'http://127.0.0.1:5173' ||
+            origin === 'http://localhost:5174' ||
+            origin === 'http://127.0.0.1:5174' ||
+            origin === 'http://localhost:5175' ||
+            origin === 'http://127.0.0.1:5175') {
           return callback(null, true);
         }
       }
@@ -174,21 +189,34 @@ import websiteVersionsRouter from './routes/websiteVersions.routes.js'
 // Health check endpoint (no auth required)
 app.get('/health', (req, res) => {
   res.json({ 
-    status: 'healthy', 
-    timestamp: new Date().toISOString(),
-    version: process.env.APP_VERSION || '1.0.0'
+    success: true,
+    statusCode: 200,
+    data: {
+      status: 'healthy', 
+      timestamp: new Date().toISOString(),
+      version: process.env.APP_VERSION || '1.0.0'
+    },
+    message: 'Server is healthy'
   });
 });
 
 // CSRF token endpoint
 app.get('/api/v1/csrf-token', (req, res) => {
   res.json({ 
-    csrfToken: res.locals.csrfToken 
+    success: true,
+    statusCode: 200,
+    data: {
+      csrfToken: res.locals.csrfToken 
+    },
+    message: "CSRF token retrieved successfully"
   });
 });
 
 // CSRF error handler
 app.use(csrfErrorHandler);
+
+// Multer error handler for file uploads
+app.use(handleMulterError);
 
 // Apply enhanced security checks to API routes
 app.use('/api/v1/*', (req, res, next) => {

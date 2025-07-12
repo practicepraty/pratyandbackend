@@ -16,7 +16,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-// Registration route
+// Registration route with file upload handling
 router.post("/register", 
   upload.fields([
     {
@@ -28,11 +28,47 @@ router.post("/register",
       maxCount: 1,
     }
   ]),
+  (req, res, next) => {
+    console.log('Registration request received');
+    console.log('Content-Type:', req.headers['content-type']);
+    console.log('Files:', req.files);
+    console.log('Body keys:', Object.keys(req.body));
+    next();
+  },
   registerUser
 );
 
+// Development route without CSRF protection for testing
+if (process.env.NODE_ENV !== 'production') {
+  router.post("/register-dev", 
+    upload.fields([
+      {
+        name: "profilePhoto",
+        maxCount: 1,
+      },
+      {
+        name: "cv",
+        maxCount: 1,
+      }
+    ]),
+    (req, res, next) => {
+      console.log('Development registration request received');
+      console.log('Content-Type:', req.headers['content-type']);
+      console.log('Files:', req.files);
+      console.log('Body keys:', Object.keys(req.body));
+      next();
+    },
+    registerUser
+  );
+}
+
 // Authentication routes
 router.route("/login").post(loginUser)
+
+// Development login route without CSRF protection for testing
+if (process.env.NODE_ENV !== 'production') {
+  router.post("/login-dev", loginUser);
+}
 
 // Password recovery routes (public)
 router.route("/forgot-password").post(forgotPassword)

@@ -141,14 +141,18 @@ const encryptAuditData = (data) => {
     }
     
     const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipher('aes-256-cbc', AUDIT_ENCRYPTION_KEY.slice(0, 32));
+    const key = crypto.scryptSync(AUDIT_ENCRYPTION_KEY, 'salt', 32);
+    const cipher = crypto.createCipherGCM('aes-256-gcm', key, iv);
     let encrypted = cipher.update(JSON.stringify(data), 'utf8', 'hex');
     encrypted += cipher.final('hex');
+    const authTag = cipher.getAuthTag();
     
     return {
       encrypted: true,
       data: encrypted,
       iv: iv.toString('hex'),
+      authTag: authTag.toString('hex'),
+      algorithm: 'aes-256-gcm',
       timestamp: new Date().toISOString()
     };
   } catch (error) {

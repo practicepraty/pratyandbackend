@@ -293,8 +293,9 @@ const errorHandler = (err, req, res, next) => {
   // Sanitize error response for production
   const response = {
     success: false,
-    message: error.message || 'Internal Server Error',
     statusCode: error.statusCode || 500,
+    data: null,
+    message: error.message || 'Internal Server Error',
     timestamp: new Date().toISOString(),
     errorId: errorId
   };

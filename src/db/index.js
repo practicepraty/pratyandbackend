@@ -31,7 +31,13 @@ const connectDB = async () => {
 
         // Connect to MongoDB
         logger.info('Attempting to connect to MongoDB...');
-        const connectionInstance = await mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`, options);
+        
+        // Ensure proper URI format without double slashes
+        const baseUri = process.env.MONGODB_URI.replace(/\/$/, ''); // Remove trailing slash if present
+        const fullUri = `${baseUri}/${DB_NAME}`;
+        
+        logger.info(`Connecting to: ${fullUri}`);
+        const connectionInstance = await mongoose.connect(fullUri, options);
         
         logger.info(`MongoDB connected successfully!`);
         logger.info(`Database Host: ${connectionInstance.connection.host}`);

@@ -11,7 +11,7 @@ const UserSchema = new mongoose.Schema({
   personalInfo: {
     title: {
       type: String,
-      required: [true, 'Title is required'],
+      required: false, // Make title optional since it's not always provided
       enum: ['Dr.', 'Prof.', 'Mr.', 'Ms.', 'Mrs.'],
       trim: true
     },
@@ -51,9 +51,9 @@ const UserSchema = new mongoose.Schema({
       }
     },
     dateOfBirth: {
-  type:String,
+      type: String,
       required: [true, 'Date of birth is required'],
-},
+    },
     gender: {
       type: String,
       required: [true, 'Gender is required'],
@@ -97,8 +97,9 @@ const UserSchema = new mongoose.Schema({
       trim: true
     },
     licenseExpiryDate: {
-  type: Date,
-},
+      type: Date,
+      required: false
+    },
     yearsOfExperience: {
       type: String,
       required: [true, 'Years of experience is required'],
@@ -210,14 +211,14 @@ const UserSchema = new mongoose.Schema({
     password: {
       type: String,
       required: [true, 'Password is required'],
-      minlength: [12, 'Password must be at least 12 characters'],
+      minlength: [8, 'Password must be at least 8 characters'],
       select: false,
       validate: {
         validator: function(v) {
-          // Strong password: min 12 chars, uppercase, lowercase, number, special char
-          return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/.test(v);
+          // More flexible password: min 8 chars, at least one letter and one number
+          return /^(?=.*[a-zA-Z])(?=.*\d).{8,}$/.test(v);
         },
-        message: 'Password must contain at least 12 characters with uppercase, lowercase, number, and special character'
+        message: 'Password must contain at least 8 characters with at least one letter and one number'
       }
     },
     refreshToken: {
