@@ -32,120 +32,295 @@ const generateAccessAndRefreshTokens = async (userId) => {
 const registerUser = asyncHandler(async (req, res) => {
   // Enhanced debug logging to understand incoming data structure
   console.log('=== REGISTRATION DEBUG START ===');
-  console.log('Full req.body:', JSON.stringify(req.body, null, 2));
-  console.log('Request body keys:', Object.keys(req.body));
-  console.log('Request body type:', typeof req.body);
-  console.log('Request body length:', JSON.stringify(req.body).length);
+  console.log('Request Content-Type:', req.headers['content-type']);
+  console.log('Request method:', req.method);
+  console.log('Files received:', req.files ? Object.keys(req.files) : 'None');
+  console.log('Body keys:', Object.keys(req.body || {}));
+  console.log('Body size:', JSON.stringify(req.body || {}).length);
+  console.log('Is multipart/form-data:', req.headers['content-type']?.includes('multipart/form-data'));
+  console.log('Is application/json:', req.headers['content-type']?.includes('application/json'));
   
-  // Check for nested structures
-  Object.keys(req.body).forEach(key => {
-    const value = req.body[key];
-    console.log(`${key}:`, typeof value, Array.isArray(value) ? '[Array]' : '', value);
-  });
-  
-  console.log('Sample field values:', {
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    professionalEmail: req.body.professionalEmail,
-    phone: req.body.phone,
-    street: req.body.street,
-    city: req.body.city,
-    state: req.body.state,
-    specialty: req.body.specialty,
-    password: req.body.password ? '[PRESENT]' : '[MISSING]'
-  });
+  // Detailed field analysis
+  if (req.body && typeof req.body === 'object') {
+    Object.keys(req.body).forEach(key => {
+      const value = req.body[key];
+      const type = typeof value;
+      const isArray = Array.isArray(value);
+      const isEmpty = !value || (typeof value === 'string' && !value.trim());
+      console.log(`Field [${key}]: type=${type}, array=${isArray}, empty=${isEmpty}, value=${
+        type === 'string' && value.length > 50 ? value.substring(0, 50) + '...' : value
+      }`);
+    });
+  }
   console.log('=== REGISTRATION DEBUG END ===');
 
-  // Extract fields directly from req.body (expecting flat structure)
-  const {
+  // Robust field extraction function that handles multiple formats
+  const extractField = (fieldName, alternatives = []) => {
+    // Try direct field name first
+    if (req.body[fieldName] !== undefined && req.body[fieldName] !== null && req.body[fieldName] !== '') {
+      return req.body[fieldName];
+    }
+    
+    // Try alternative field names
+    for (const alt of alternatives) {
+      if (req.body[alt] !== undefined && req.body[alt] !== null && req.body[alt] !== '') {
+        return req.body[alt];
+      }
+    }
+    
+    // Try nested access (in case of nested objects)
+    const nestedPatterns = [
+      `personalInfo.${fieldName}`,
+      `personalInfo[${fieldName}]`,
+      `professionalInfo.${fieldName}`,
+      `professionalInfo[${fieldName}]`,
+      `practiceInfo.${fieldName}`,
+      `practiceInfo[${fieldName}]`,
+      `accountInfo.${fieldName}`,
+      `accountInfo[${fieldName}]`
+    ];
+    
+    for (const pattern of nestedPatterns) {
+      const value = getNestedValue(req.body, pattern);
+      if (value !== undefined && value !== null && value !== '') {
+        return value;
+      }
+    }
+    
+    return undefined;
+  };
+
+  // Helper function to get nested values
+  const getNestedValue = (obj, path) => {
+    try {
+      return path.split('.').reduce((current, key) => {
+        if (current && typeof current === 'object') {
+          // Handle array notation like [fieldName]
+          const cleanKey = key.replace(/[\[\]]/g, '');
+          return current[cleanKey];
+        }
+        return undefined;
+      }, obj);
+    } catch {
+      return undefined;
+    }
+  };
+
+  // Extract all fields using robust extraction
+  const extractedFields = {
     // Personal info
-    title,
-    firstName,
-    lastName,
-    professionalEmail,
-    phone,
-    dateOfBirth,
-    gender,
+    title: extractField('title', ['personalInfo.title']),
+    firstName: extractField('firstName', ['first_name', 'firstname', 'personalInfo.firstName']),
+    lastName: extractField('lastName', ['last_name', 'lastname', 'personalInfo.lastName']),
+    professionalEmail: extractField('professionalEmail', ['email', 'professional_email', 'personalInfo.professionalEmail']),
+    phone: extractField('phone', ['phoneNumber', 'phone_number', 'personalInfo.phone']),
+    dateOfBirth: extractField('dateOfBirth', ['date_of_birth', 'dob', 'personalInfo.dateOfBirth']),
+    gender: extractField('gender', ['personalInfo.gender']),
     
     // Professional info
-    specialty,
-    subSpecialty,
-    licenseNumber,
-    licenseState,
-    licenseExpiryDate,
-    yearsOfExperience,
-    medicalSchool,
-    graduationYear,
+    specialty: extractField('specialty', ['medical_specialty', 'professionalInfo.specialty']),
+    subSpecialty: extractField('subSpecialty', ['sub_specialty', 'professionalInfo.subSpecialty']),
+    licenseNumber: extractField('licenseNumber', ['license_number', 'professionalInfo.licenseNumber']),
+    licenseState: extractField('licenseState', ['license_state', 'professionalInfo.licenseState']),
+    licenseExpiryDate: extractField('licenseExpiryDate', ['license_expiry_date', 'professionalInfo.licenseExpiryDate']),
+    yearsOfExperience: extractField('yearsOfExperience', ['years_of_experience', 'experience', 'professionalInfo.yearsOfExperience']),
+    medicalSchool: extractField('medicalSchool', ['medical_school', 'professionalInfo.medicalSchool']),
+    graduationYear: extractField('graduationYear', ['graduation_year', 'professionalInfo.graduationYear']),
     
     // Residency info
-    residencyProgram,
-    residencyInstitution,
-    residencyCompletionYear,
+    residencyProgram: extractField('residencyProgram', ['residency_program', 'professionalInfo.residency.program']),
+    residencyInstitution: extractField('residencyInstitution', ['residency_institution', 'professionalInfo.residency.institution']),
+    residencyCompletionYear: extractField('residencyCompletionYear', ['residency_completion_year', 'professionalInfo.residency.completionYear']),
     
     // Fellowship info
-    fellowshipProgram,
-    fellowshipInstitution,
-    fellowshipCompletionYear,
+    fellowshipProgram: extractField('fellowshipProgram', ['fellowship_program', 'professionalInfo.fellowship.program']),
+    fellowshipInstitution: extractField('fellowshipInstitution', ['fellowship_institution', 'professionalInfo.fellowship.institution']),
+    fellowshipCompletionYear: extractField('fellowshipCompletionYear', ['fellowship_completion_year', 'professionalInfo.fellowship.completionYear']),
     
     // Certifications
-    boardCertifications,
+    boardCertifications: extractField('boardCertifications', ['board_certifications', 'certifications', 'professionalInfo.boardCertifications']),
     
     // Practice info
-    practiceType,
-    institutionName,
+    practiceType: extractField('practiceType', ['practice_type', 'practiceInfo.practiceType']),
+    institutionName: extractField('institutionName', ['institution_name', 'institution', 'practiceInfo.institutionName']),
     
     // Address info
-    street,
-    city,
-    state,
-    zipCode,
-    country,
-    latitude,
-    longitude,
+    street: extractField('street', ['streetAddress', 'street_address', 'address.street', 'practiceInfo.address.street']),
+    city: extractField('city', ['address.city', 'practiceInfo.address.city']),
+    state: extractField('state', ['address.state', 'practiceInfo.address.state']),
+    zipCode: extractField('zipCode', ['zip_code', 'postal_code', 'zip', 'address.zipCode', 'practiceInfo.address.zipCode']),
+    country: extractField('country', ['address.country', 'practiceInfo.address.country']),
+    latitude: extractField('latitude', ['lat', 'address.latitude', 'practiceInfo.address.coordinates.latitude']),
+    longitude: extractField('longitude', ['lng', 'lon', 'address.longitude', 'practiceInfo.address.coordinates.longitude']),
     
     // Schedule info
-    officeHours,
-    languages,
-    insuranceAccepted,
+    officeHours: extractField('officeHours', ['office_hours', 'schedule', 'practiceInfo.officeHours']),
+    languages: extractField('languages', ['practiceInfo.languages']),
+    insuranceAccepted: extractField('insuranceAccepted', ['insurance_accepted', 'insurance', 'practiceInfo.insuranceAccepted']),
     
     // Account info
-    password
-  } = req.body;
+    password: extractField('password', ['accountInfo.password'])
+  };
 
-  // Enhanced validation for required fields with better error messages
-  console.log('Validating required fields...');
+  // Enhanced logging of extracted fields
+  console.log('=== EXTRACTED FIELDS DEBUG ===');
+  Object.entries(extractedFields).forEach(([key, value]) => {
+    const status = value !== undefined ? '✓' : '✗';
+    const type = typeof value;
+    const preview = type === 'string' && value && value.length > 30 ? value.substring(0, 30) + '...' : value;
+    console.log(`${status} ${key}: ${type} = ${preview}`);
+  });
+  console.log('=== EXTRACTED FIELDS DEBUG END ===');
+
+  // Use extracted fields for validation
+  const {
+    title, firstName, lastName, professionalEmail, phone, dateOfBirth, gender,
+    specialty, subSpecialty, licenseNumber, licenseState, licenseExpiryDate,
+    yearsOfExperience, medicalSchool, graduationYear,
+    residencyProgram, residencyInstitution, residencyCompletionYear,
+    fellowshipProgram, fellowshipInstitution, fellowshipCompletionYear,
+    boardCertifications, practiceType, institutionName,
+    street, city, state, zipCode, country, latitude, longitude,
+    officeHours, languages, insuranceAccepted, password
+  } = extractedFields;
+
+  // Enhanced validation with detailed error reporting
+  console.log('=== VALIDATION START ===');
   
-  // Personal Info validation
-  if (!firstName?.trim()) throw new ApiError(400, "First name is required");
-  if (!lastName?.trim()) throw new ApiError(400, "Last name is required");
-  if (!professionalEmail?.trim()) throw new ApiError(400, "Professional email is required");
-  if (!phone?.trim()) throw new ApiError(400, "Phone number is required");
-  if (!dateOfBirth?.trim()) throw new ApiError(400, "Date of birth is required");
-  if (!gender?.trim()) throw new ApiError(400, "Gender is required");
-
-  // Professional Info validation
-  if (!specialty?.trim()) throw new ApiError(400, "Medical specialty is required");
-  if (!licenseNumber?.trim()) throw new ApiError(400, "License number is required");
-  if (!licenseState?.trim()) throw new ApiError(400, "License state is required");
-  if (!yearsOfExperience?.trim()) throw new ApiError(400, "Years of experience is required");
-  if (!medicalSchool?.trim()) throw new ApiError(400, "Medical school is required");
-
-  // Practice Info validation
-  if (!practiceType?.trim()) throw new ApiError(400, "Practice type is required");
-  if (!institutionName?.trim()) throw new ApiError(400, "Institution name is required");
-
-  // Address validation
-  if (!street?.trim()) throw new ApiError(400, "Street address is required");
-  if (!city?.trim()) throw new ApiError(400, "City is required");
-  if (!state?.trim()) throw new ApiError(400, "State is required");
-  if (!zipCode?.trim()) throw new ApiError(400, "ZIP code is required");
-
-  // Account validation
-  if (!password?.trim()) throw new ApiError(400, "Password is required");
+  // Add format validation functions
+  const isValidEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
   
-  console.log('All required fields validated successfully');
+  const isValidPhone = (phone) => {
+    return /^\+?[\d\s\-\(\)]{10,}$/.test(phone);
+  };
   
-  // Check if user already exists
+  const isValidDate = (dateString) => {
+    const date = new Date(dateString);
+    return date instanceof Date && !isNaN(date) && dateString.length >= 8;
+  };
+  
+  const isValidPassword = (password) => {
+    return password && password.length >= 8 && /^(?=.*[a-zA-Z])(?=.*\d).{8,}$/.test(password);
+  };
+  
+  const requiredFields = [
+    // Personal Info with format validation
+    { field: 'firstName', value: firstName, message: 'First name is required', 
+      validator: (v) => v && v.trim().length >= 2, formatMessage: 'First name must be at least 2 characters' },
+    { field: 'lastName', value: lastName, message: 'Last name is required',
+      validator: (v) => v && v.trim().length >= 2, formatMessage: 'Last name must be at least 2 characters' },
+    { field: 'professionalEmail', value: professionalEmail, message: 'Professional email is required',
+      validator: isValidEmail, formatMessage: 'Please provide a valid email address' },
+    { field: 'phone', value: phone, message: 'Phone number is required',
+      validator: isValidPhone, formatMessage: 'Please provide a valid phone number' },
+    { field: 'dateOfBirth', value: dateOfBirth, message: 'Date of birth is required',
+      validator: isValidDate, formatMessage: 'Please provide a valid date of birth (YYYY-MM-DD)' },
+    { field: 'gender', value: gender, message: 'Gender is required',
+      validator: (v) => ['male', 'female', 'other', 'prefer-not-to-say'].includes(v), 
+      formatMessage: 'Gender must be one of: male, female, other, prefer-not-to-say' },
+    
+    // Professional Info
+    { field: 'specialty', value: specialty, message: 'Medical specialty is required',
+      validator: (v) => [
+        'general-practice', 'internal-medicine', 'cardiology', 'dermatology',
+        'neurology', 'orthopedics', 'pediatrics', 'psychiatry', 'surgery',
+        'oncology', 'radiology', 'emergency-medicine', 'anesthesiology',
+        'pathology', 'ophthalmology', 'otolaryngology', 'urology',
+        'obstetrics-gynecology', 'family-medicine', 'infectious-disease',
+        'pulmonology', 'nephrology', 'endocrinology', 'gastroenterology',
+        'rheumatology', 'hematology', 'plastic-surgery', 'other'
+      ].includes(v),
+      formatMessage: 'Please select a valid medical specialty' },
+    { field: 'licenseNumber', value: licenseNumber, message: 'License number is required' },
+    { field: 'licenseState', value: licenseState, message: 'License state is required' },
+    { field: 'yearsOfExperience', value: yearsOfExperience, message: 'Years of experience is required',
+      validator: (v) => ['0-2', '3-5', '6-10', '11-15', '16-20', '20+'].includes(v),
+      formatMessage: 'Years of experience must be one of: 0-2, 3-5, 6-10, 11-15, 16-20, 20+' },
+    { field: 'medicalSchool', value: medicalSchool, message: 'Medical school is required' },
+    
+    // Practice Info
+    { field: 'practiceType', value: practiceType, message: 'Practice type is required',
+      validator: (v) => [
+        'private-practice', 'hospital', 'clinic', 'academic-medical-center',
+        'group-practice', 'telemedicine', 'government-hospital',
+        'community-health-center', 'urgent-care', 'other'
+      ].includes(v),
+      formatMessage: 'Please select a valid practice type' },
+    { field: 'institutionName', value: institutionName, message: 'Institution name is required' },
+    
+    // Address Info
+    { field: 'street', value: street, message: 'Street address is required' },
+    { field: 'city', value: city, message: 'City is required' },
+    { field: 'state', value: state, message: 'State is required' },
+    { field: 'zipCode', value: zipCode, message: 'ZIP code is required' },
+    
+    // Account Info
+    { field: 'password', value: password, message: 'Password is required',
+      validator: isValidPassword, formatMessage: 'Password must be at least 8 characters with at least one letter and one number' }
+  ];
+
+  const validationErrors = [];
+  const validFields = [];
+
+  // Validate each required field
+  requiredFields.forEach(({ field, value, message, validator, formatMessage }) => {
+    // Check if field exists and is not empty
+    const hasValue = value !== undefined && value !== null && 
+                    (typeof value === 'string' ? value.trim() !== '' : true);
+    
+    if (!hasValue) {
+      validationErrors.push({ field, message });
+      console.log(`✗ ${field}: MISSING (value: ${value})`);
+      return;
+    }
+    
+    // Check format if validator is provided
+    if (validator && !validator(value)) {
+      validationErrors.push({ field, message: formatMessage || message });
+      console.log(`✗ ${field}: INVALID FORMAT (value: ${value})`);
+      return;
+    }
+    
+    validFields.push(field);
+    console.log(`✓ ${field}: Valid`);
+  });
+
+  // If there are validation errors, provide detailed feedback
+  if (validationErrors.length > 0) {
+    console.log('=== VALIDATION FAILED ===');
+    console.log(`Valid fields (${validFields.length}):`, validFields);
+    console.log(`Missing fields (${validationErrors.length}):`, validationErrors.map(e => e.field));
+    
+    // Return the first validation error with suggestions
+    const firstError = validationErrors[0];
+    const suggestions = [];
+    
+    // Add suggestions for common field name variations
+    switch (firstError.field) {
+      case 'firstName':
+        suggestions.push('Try field names: firstName, first_name, firstname, personalInfo.firstName');
+        break;
+      case 'lastName':
+        suggestions.push('Try field names: lastName, last_name, lastname, personalInfo.lastName');
+        break;
+      case 'professionalEmail':
+        suggestions.push('Try field names: professionalEmail, email, professional_email, personalInfo.professionalEmail');
+        break;
+      default:
+        suggestions.push(`Ensure the field '${firstError.field}' is included in the request`);
+    }
+    
+    const errorMessage = `${firstError.message}. ${suggestions.join('. ')}`;
+    throw new ApiError(400, errorMessage);
+  }
+
+  console.log(`✓ All ${validFields.length} required fields validated successfully`);
+  console.log('=== VALIDATION END ===');
+  
+  // Check if user already exists with detailed feedback
+  console.log('=== DUPLICATE CHECK START ===');
   const existedUser = await User.findOne({
     $or: [
       { 'personalInfo.phone': phone },
@@ -154,8 +329,25 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 
   if (existedUser) {
-    throw new ApiError(409, "User with email or phone already exists");
+    console.log('Duplicate user found:', {
+      existingEmail: existedUser.personalInfo.professionalEmail,
+      existingPhone: existedUser.personalInfo.phone,
+      requestEmail: professionalEmail.toLowerCase().trim(),
+      requestPhone: phone
+    });
+    
+    const duplicateFields = [];
+    if (existedUser.personalInfo.professionalEmail === professionalEmail.toLowerCase().trim()) {
+      duplicateFields.push('email');
+    }
+    if (existedUser.personalInfo.phone === phone) {
+      duplicateFields.push('phone number');
+    }
+    
+    throw new ApiError(409, `User with this ${duplicateFields.join(' and ')} already exists. Please use different credentials or try logging in.`);
   }
+  console.log('✓ No duplicate users found');
+  console.log('=== DUPLICATE CHECK END ===');
 
   // Handle file uploads
   const profilePhotoLocalPath = req.files?.profilePhoto?.[0]?.path;
@@ -226,10 +418,12 @@ const registerUser = asyncHandler(async (req, res) => {
     return typeof field === 'object' ? field : {};
   };
 
-  // Create user with proper schema structure (using flat field names)
-  const user = await User.create({
+  // Create user with proper schema structure and enhanced error handling
+  console.log('=== USER CREATION START ===');
+  
+  const userDataStructure = {
     personalInfo: {
-      title: title,
+      title: title || undefined,
       firstName: firstName,
       lastName: lastName,
       fullName: `${firstName} ${lastName}`,
@@ -269,7 +463,7 @@ const registerUser = asyncHandler(async (req, res) => {
         city: city,
         state: state,
         zipCode: zipCode,
-        country: country || 'IN',
+        country: country || 'US',
         coordinates: {
           latitude: latitude ? parseFloat(latitude) : undefined,
           longitude: longitude ? parseFloat(longitude) : undefined
@@ -282,7 +476,56 @@ const registerUser = asyncHandler(async (req, res) => {
     accountInfo: {
       password: password
     }
+  };
+
+  // Log the user data structure before creation
+  console.log('User data structure prepared:', {
+    personalInfo: {
+      hasFirstName: !!userDataStructure.personalInfo.firstName,
+      hasLastName: !!userDataStructure.personalInfo.lastName,
+      hasEmail: !!userDataStructure.personalInfo.professionalEmail,
+      hasPhone: !!userDataStructure.personalInfo.phone
+    },
+    professionalInfo: {
+      hasSpecialty: !!userDataStructure.professionalInfo.specialty,
+      hasLicense: !!userDataStructure.professionalInfo.licenseNumber,
+      hasSchool: !!userDataStructure.professionalInfo.medicalSchool
+    },
+    practiceInfo: {
+      hasPracticeType: !!userDataStructure.practiceInfo.practiceType,
+      hasInstitution: !!userDataStructure.practiceInfo.institutionName,
+      hasAddress: !!(userDataStructure.practiceInfo.address.street && 
+                     userDataStructure.practiceInfo.address.city)
+    },
+    accountInfo: {
+      hasPassword: !!userDataStructure.accountInfo.password
+    }
   });
+
+  let user;
+  try {
+    console.log('Creating user in database...');
+    user = await User.create(userDataStructure);
+    console.log('✓ User created successfully with ID:', user._id);
+  } catch (createError) {
+    console.error('=== USER CREATION FAILED ===');
+    console.error('Error name:', createError.name);
+    console.error('Error message:', createError.message);
+    
+    if (createError.name === 'ValidationError') {
+      console.error('Validation errors:', createError.errors);
+      const validationMessages = Object.values(createError.errors).map(err => err.message);
+      throw new ApiError(400, `Validation failed: ${validationMessages.join(', ')}`);
+    } else if (createError.code === 11000) {
+      console.error('Duplicate key error:', createError.keyPattern);
+      throw new ApiError(409, 'User with this email or license number already exists');
+    } else {
+      console.error('Unexpected error during user creation:', createError);
+      throw new ApiError(500, 'Failed to create user account. Please try again.');
+    }
+  }
+  
+  console.log('=== USER CREATION END ===');
 
   const createdUser = await User.findById(user._id).select("-accountInfo.password -accountInfo.refreshToken");
 

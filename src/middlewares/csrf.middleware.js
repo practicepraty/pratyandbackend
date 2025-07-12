@@ -14,13 +14,39 @@ export const csrfProtection = (req, res, next) => {
   const secret = req.session.csrfSecret || (req.session.csrfSecret = tokens.secretSync());
   
   if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
-    const token = req.headers['x-csrf-token'] || (req.body && req.body._csrf) || req.query._csrf;
+    // Extract CSRF token from various sources
+    let token = req.headers['x-csrf-token'] || 
+                req.headers['csrf-token'] ||
+                (req.body && req.body._csrf) || 
+                (req.body && req.body.csrfToken) ||
+                req.query._csrf ||
+                req.query.csrfToken;
     
-    if (!token || !tokens.verify(secret, token)) {
+    // For multipart/form-data, check if token is in the body fields
+    if (!token && req.headers['content-type']?.includes('multipart/form-data')) {
+      // Try to extract from form fields
+      if (req.body) {
+        token = req.body.csrfToken || req.body._csrf;
+      }
+    }
+    
+    if (!token) {
+      console.log('CSRF token not found in headers, body, or query');
+      console.log('Available headers:', Object.keys(req.headers));
+      console.log('Body keys:', req.body ? Object.keys(req.body) : 'No body');
       return res.status(403).json({
         error: 'Invalid CSRF token',
         code: 'CSRF_TOKEN_INVALID',
-        message: 'CSRF token validation failed'
+        message: 'CSRF token validation failed - token not provided'
+      });
+    }
+    
+    if (!tokens.verify(secret, token)) {
+      console.log('CSRF token verification failed');
+      return res.status(403).json({
+        error: 'Invalid CSRF token',
+        code: 'CSRF_TOKEN_INVALID',
+        message: 'CSRF token validation failed - invalid token'
       });
     }
   }
