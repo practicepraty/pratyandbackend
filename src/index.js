@@ -20,24 +20,48 @@ const logger = winston.createLogger({
   ]
 });
 
-// Enhanced startup with proper error handling
+// Enhanced startup with proper error handling and fallback
 const startApplication = async () => {
   try {
     logger.info('Starting application...');
     
-    // Connect to MongoDB first
-    await connectDB();
-    logger.info('MongoDB connection established');
+    // Try to connect to MongoDB
+    let mongoConnected = false;
+    try {
+      await connectDB();
+      logger.info('MongoDB connection established');
+      mongoConnected = true;
+    } catch (mongoError) {
+      logger.error('MongoDB connection failed:', mongoError.message);
+      logger.warn('Continuing without MongoDB - some features may be limited');
+      logger.warn('Please check:');
+      logger.warn('1. MongoDB Atlas IP whitelist (add your current IP)');
+      logger.warn('2. Database credentials in .env file');
+      logger.warn('3. Network connectivity');
+      
+      // Set a flag for the rest of the application to know MongoDB is unavailable
+      process.env.MONGODB_AVAILABLE = 'false';
+    }
     
-    // Start the server with all security features
+    // Start the server regardless of MongoDB status
     await startServer();
-    logger.info('Application started successfully');
+    
+    if (mongoConnected) {
+      logger.info('Application started successfully with full database functionality');
+    } else {
+      logger.info('Application started successfully in limited mode (no database)');
+    }
     
   } catch (error) {
     logger.error('Failed to start application:', error);
     
-    // Graceful shutdown on startup failure
-    process.exit(1);
+    // Only exit if server startup fails, not MongoDB
+    if (error.message.includes('server') || error.message.includes('port')) {
+      logger.error('Critical server error - shutting down');
+      process.exit(1);
+    } else {
+      logger.warn('Non-critical error during startup, continuing...');
+    }
   }
 };
 

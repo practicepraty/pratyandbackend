@@ -151,7 +151,10 @@ export const initializeRedis = async () => {
 // Get Redis client instance with fallback
 export const getRedisClient = () => {
   if (!redisClient) {
-    logger.warn('Redis client not available, using fallback mode');
+    // Only log this occasionally to reduce noise
+    if (Math.random() < 0.01) { // 1% chance to log
+      logger.info('Redis client not available, using memory fallback');
+    }
     return null;
   }
   return redisClient;
@@ -162,13 +165,13 @@ export const safeRedisOperation = async (operation, fallback = null) => {
   try {
     const client = getRedisClient();
     if (!client) {
-      logger.debug('Redis unavailable, using fallback');
+      // Silent fallback - no need to log every time
       return fallback;
     }
     
     return await operation(client);
   } catch (error) {
-    logger.warn('Redis operation failed, using fallback:', error.message);
+    logger.debug('Redis operation failed, using fallback:', error.message);
     return fallback;
   }
 };

@@ -22,11 +22,14 @@ const connectDB = async () => {
             throw new Error('MONGODB_URI environment variable is not set');
         }
 
-        // MongoDB connection options for better reliability
+        // MongoDB connection options for better reliability (removed deprecated options)
         const options = {
-            serverSelectionTimeoutMS: 5000, // 5 seconds timeout
+            serverSelectionTimeoutMS: 10000, // 10 seconds timeout
             socketTimeoutMS: 45000, // 45 seconds socket timeout
             maxPoolSize: 10, // Maintain up to 10 socket connections
+            bufferCommands: false, // Disable mongoose buffering
+            // bufferMaxEntries: 0, // Disabled - not supported in newer MongoDB driver
+            // Note: useNewUrlParser and useUnifiedTopology are now deprecated and removed
         };
 
         // Connect to MongoDB

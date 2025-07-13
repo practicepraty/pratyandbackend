@@ -61,7 +61,7 @@ const audioStorage = multer.diskStorage({
 });
 
 // Enhanced file filter for audio files with magic number validation
-const audioFileFilter = async (req, file, cb) => {
+const audioFileFilter = (req, file, cb) => {
   const allowedAudioTypes = [
     'audio/mpeg',      // MP3
     'audio/wav',       // WAV
@@ -77,8 +77,20 @@ const audioFileFilter = async (req, file, cb) => {
   const allowedExtensions = ['.mp3', '.wav', '.m4a', '.flac', '.ogg', '.webm'];
   const fileExtension = path.extname(file.originalname).toLowerCase();
   
-  // Basic MIME type and extension check
-  if (!allowedAudioTypes.includes(file.mimetype) && !allowedExtensions.includes(fileExtension)) {
+  // Basic MIME type and extension check - accept if either MIME type OR extension is valid
+  const validMimeType = allowedAudioTypes.includes(file.mimetype);
+  const validExtension = allowedExtensions.includes(fileExtension);
+  
+  console.log(`[MULTER] File validation check:`, {
+    originalname: file.originalname,
+    mimetype: file.mimetype,
+    extension: fileExtension,
+    validMimeType,
+    validExtension
+  });
+  
+  if (!validMimeType && !validExtension) {
+    console.error(`[MULTER] File rejected - MIME: ${file.mimetype}, Extension: ${fileExtension}`);
     return cb(new ApiError(400, 'Invalid audio file format. Supported formats: MP3, WAV, M4A, FLAC, OGG, WebM'), false);
   }
   
@@ -96,18 +108,73 @@ const audioFileFilter = async (req, file, cb) => {
 
 // Enhanced magic number validation middleware
 export const validateAudioFile = async (req, res, next) => {
+  console.log(`[VALIDATE DEBUG] Starting validateAudioFile middleware`);
+  console.log(`[VALIDATE DEBUG] Has file: ${!!req.file}`);
+  
   if (!req.file) {
+    console.log(`[VALIDATE DEBUG] No file present, skipping validation`);
     return next();
   }
   
+  console.log(`[DEBUG] Validating audio file:`, {
+    originalname: req.file.originalname,
+    mimetype: req.file.mimetype,
+    size: req.file.size,
+    path: req.file.path,
+    destination: req.file.destination,
+    filename: req.file.filename
+  });
+  
+  // Verify file exists on filesystem
+  if (!fs.existsSync(req.file.path)) {
+    console.error(`[ERROR] Audio file not found at: ${req.file.path}`);
+    return res.status(500).json({
+      success: false,
+      error: {
+        code: 'FILE_NOT_FOUND',
+        message: 'Audio file was not saved properly during upload'
+      }
+    });
+  }
+  
   try {
+    // Check if file exists and has content
+    const fileStats = fs.statSync(req.file.path);
+    if (fileStats.size === 0) {
+      console.error(`[ERROR] Audio file is empty: ${req.file.originalname}`);
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'EMPTY_FILE',
+          message: 'Audio file is empty or contains no data'
+        }
+      });
+    }
+    
+    // Check minimum file size (1KB for audio)
+    if (fileStats.size < 1024) {
+      console.error(`[ERROR] Audio file too small: ${fileStats.size} bytes`);
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'FILE_TOO_SMALL',
+          message: 'Audio file is too small to contain valid audio data'
+        }
+      });
+    }
+    
     // Read the first few bytes to detect file type
     const buffer = fs.readFileSync(req.file.path, { start: 0, end: 32 });
     const detectedType = await fileTypeFromBuffer(buffer);
     
+    console.log(`[DEBUG] Detected file type:`, detectedType);
+    
     const validAudioTypes = ['mp3', 'wav', 'mp4', 'flac', 'ogg', 'webm'];
     
     if (!detectedType || !validAudioTypes.includes(detectedType.ext)) {
+      console.error(`[ERROR] Invalid file type detected:`, detectedType);
       // Clean up the uploaded file
       fs.unlinkSync(req.file.path);
       return res.status(400).json({
@@ -119,9 +186,55 @@ export const validateAudioFile = async (req, res, next) => {
       });
     }
     
+    // Additional audio content validation
+    try {
+      const audioBuffer = fs.readFileSync(req.file.path);
+      
+      // Check for common audio file headers/signatures
+      let isValidAudio = false;
+      
+      if (detectedType.ext === 'mp3') {
+        // MP3 files should have ID3 tag or MP3 frame header
+        isValidAudio = audioBuffer.indexOf(Buffer.from('ID3')) === 0 || 
+                      audioBuffer.indexOf(Buffer.from([0xFF, 0xFB])) !== -1 ||
+                      audioBuffer.indexOf(Buffer.from([0xFF, 0xFA])) !== -1;
+      } else if (detectedType.ext === 'wav') {
+        // WAV files should have RIFF header
+        isValidAudio = audioBuffer.indexOf(Buffer.from('RIFF')) === 0 && 
+                      audioBuffer.indexOf(Buffer.from('WAVE')) === 8;
+      } else if (detectedType.ext === 'mp4') {
+        // M4A files should have proper atoms
+        isValidAudio = audioBuffer.indexOf(Buffer.from('ftyp')) !== -1;
+      } else {
+        // For other formats, accept if file type detection passed
+        isValidAudio = true;
+      }
+      
+      if (!isValidAudio) {
+        console.error(`[ERROR] Audio file appears corrupted or invalid`);
+        fs.unlinkSync(req.file.path);
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'CORRUPTED_AUDIO',
+            message: 'Audio file appears to be corrupted or invalid'
+          }
+        });
+      }
+      
+      console.log(`[DEBUG] Audio file validation passed for: ${req.file.originalname}`);
+      
+    } catch (audioCheckError) {
+      console.error(`[ERROR] Audio content validation failed:`, audioCheckError);
+      // Don't fail here, let the transcription service handle it
+    }
+    
     // Add detected type to request for later use
     req.file.detectedMimeType = detectedType.mime;
     req.file.detectedExtension = detectedType.ext;
+    
+    console.log(`[VALIDATE DEBUG] File validation completed successfully`);
+    console.log(`[VALIDATE DEBUG] File still present: ${!!req.file}`);
     
     next();
   } catch (error) {
@@ -169,13 +282,17 @@ export const upload = multer({
     }
 });
 
-// Audio upload middleware
+// Dedicated audio upload middleware with robust configuration
 export const audioUpload = multer({
     storage: audioStorage,
     fileFilter: audioFileFilter,
     limits: {
-      fileSize: 25 * 1024 * 1024, // 25MB limit for audio files
-      files: 1 // Only allow one audio file at a time
+      fileSize: 50 * 1024 * 1024, // 50MB limit for audio files
+      files: 1, // Only allow one audio file at a time
+      fields: 20, // Allow multiple form fields (language, speakerLabels, etc.)
+      fieldSize: 10 * 1024 * 1024, // 10MB per field
+      fieldNameSize: 100, // Field name size limit
+      parts: 30 // Total parts limit (files + fields)
     }
 });
 
@@ -198,8 +315,26 @@ export const multipleUpload = multer({
     }
 });
 
-// Single audio file upload middleware
-export const singleAudioUpload = audioUpload.single('audioFile');
+// Clean, dedicated audio upload middleware without conflicts
+export const singleAudioUpload = (req, res, next) => {
+  // Use the dedicated audio upload configuration directly
+  audioUpload.single('audioFile')(req, res, (err) => {
+    if (err) {
+      console.error(`[MULTER ERROR] Audio upload failed:`, {
+        message: err.message,
+        code: err.code,
+        field: err.field
+      });
+      return next(err);
+    }
+    
+    if (req.file) {
+      console.log(`[MULTER] Audio file processed: ${req.file.originalname} (${req.file.size} bytes)`);
+    }
+    
+    next();
+  });
+};
 
 // Array of audio files upload middleware
 export const multipleAudioUpload = audioUpload.array('audioFiles', 3);
@@ -212,6 +347,10 @@ export const multipleImageUpload = imageUpload.array('images', 10);
 
 // Error handling middleware for multer
 export const handleMulterError = (error, req, res, next) => {
+  console.log(`[MULTER ERROR DEBUG] Starting handleMulterError middleware`);
+  console.log(`[MULTER ERROR DEBUG] Has file: ${!!req.file}`);
+  console.log(`[MULTER ERROR DEBUG] Error: ${error ? error.message : 'none'}`);
+  
   if (error instanceof multer.MulterError) {
     if (error.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({
@@ -222,11 +361,20 @@ export const handleMulterError = (error, req, res, next) => {
         }
       });
     } else if (error.code === 'LIMIT_FILE_COUNT') {
+      console.error(`[MULTER ERROR] File count limit exceeded:`, {
+        message: error.message,
+        code: error.code,
+        field: error.field,
+        limit: error.limit
+      });
       return res.status(400).json({
         success: false,
         error: {
           code: 'TOO_MANY_FILES',
-          message: 'Too many files uploaded'
+          message: 'Too many files uploaded. Please upload only one audio file.',
+          details: `Expected 1 file, received ${error.limit || 'multiple'}. Ensure you're only sending one audio file in the 'audioFile' field.`,
+          expectedField: 'audioFile',
+          maxFiles: 1
         }
       });
     } else if (error.code === 'LIMIT_UNEXPECTED_FILE') {
@@ -248,6 +396,7 @@ export const handleMulterError = (error, req, res, next) => {
     });
   }
   
+  console.log(`[MULTER ERROR DEBUG] No multer error, passing to next middleware. File present: ${!!req.file}`);
   next(error);
 };
 

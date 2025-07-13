@@ -26,8 +26,12 @@ class AudioTranscriptionService {
   // Upload audio file to AssemblyAI
   async uploadAudioFile(filePath) {
     try {
+      console.log(`[DEBUG] Starting audio file upload: ${filePath}`);
+      
       const fileStats = fs.statSync(filePath);
       const fileSizeInMB = fileStats.size / (1024 * 1024);
+      
+      console.log(`[DEBUG] File stats - Size: ${fileSizeInMB.toFixed(2)}MB, Exists: ${fs.existsSync(filePath)}`);
       
       // Check file size limit (25MB)
       if (fileSizeInMB > 25) {
@@ -35,6 +39,10 @@ class AudioTranscriptionService {
       }
 
       const audioData = fs.readFileSync(filePath);
+      console.log(`[DEBUG] Audio data read, buffer size: ${audioData.length} bytes`);
+      
+      console.log(`[DEBUG] Uploading to: ${this.uploadUrl}`);
+      console.log(`[DEBUG] Using API key: ${this.apiKey ? 'Present' : 'Missing'}`);
       
       const response = await axios.post(this.uploadUrl, audioData, {
         headers: {
@@ -43,40 +51,77 @@ class AudioTranscriptionService {
         }
       });
 
+      console.log(`[DEBUG] Upload successful, response:`, response.data);
       return response.data.upload_url;
     } catch (error) {
-      console.error('Audio upload error:', error);
+      console.error('[ERROR] Audio upload error:', error.message);
+      console.error('[ERROR] Error response:', error.response?.data);
+      console.error('[ERROR] Error status:', error.response?.status);
+      console.error('[ERROR] Error headers:', error.response?.headers);
+      
       if (error.response?.data?.error) {
         throw new ApiError(400, `Upload failed: ${error.response.data.error}`);
       }
-      throw new ApiError(500, 'Failed to upload audio file');
+      if (error.response?.status === 401) {
+        throw new ApiError(401, 'Assembly AI authentication failed - check API key');
+      }
+      if (error.response?.status === 413) {
+        throw new ApiError(400, 'File too large for Assembly AI upload');
+      }
+      throw new ApiError(500, `Failed to upload audio file: ${error.message}`);
     }
   }
 
   // Submit transcription request
   async submitTranscriptionRequest(audioUrl, options = {}) {
     try {
-      const transcriptionConfig = {
-        audio_url: audioUrl,
-        language_code: options.language || 'en_us',
-        punctuate: true,
-        format_text: true,
-        
-        // Enable speaker identification if requested
-        speaker_labels: options.speakerLabels || false,
-        
-        // Enable additional features
-        auto_highlights: options.autoHighlights || false,
-        content_safety: options.contentSafety || false,
-        
-        // Confidence scoring
-        confidence: true
+      // Assembly AI requires specific language codes - let's use only supported ones
+      const languageMap = {
+        'en': 'en',
+        'es': 'es', 
+        'fr': 'fr',
+        'de': 'de',
+        'it': 'it',
+        'pt': 'pt',
+        'nl': 'nl',
+        'hi': 'hi',
+        'ja': 'ja',
+        'zh': 'zh',
+        'ko': 'ko',
+        'ru': 'ru',
+        'ar': 'ar',
+        'tr': 'tr',
+        'pl': 'pl',
+        'uk': 'uk'
       };
 
-      // Only set speakers_expected if speaker_labels is enabled
-      if (options.speakerLabels) {
-        transcriptionConfig.speakers_expected = options.expectedSpeakers || 2;
+      // Create minimal, valid transcription config
+      const transcriptionConfig = {
+        audio_url: audioUrl
+      };
+
+      // Add optional parameters only if they have valid values
+      const mappedLanguage = languageMap[options.language] || 'en';
+      if (mappedLanguage !== 'en') {
+        transcriptionConfig.language_code = mappedLanguage;
       }
+
+      // Add speaker labels only if explicitly requested
+      if (options.speakerLabels === true) {
+        transcriptionConfig.speaker_labels = true;
+        if (options.expectedSpeakers && options.expectedSpeakers > 1 && options.expectedSpeakers <= 10) {
+          transcriptionConfig.speakers_expected = parseInt(options.expectedSpeakers);
+        }
+      }
+
+      // Add auto highlights only if requested
+      if (options.autoHighlights === true) {
+        transcriptionConfig.auto_highlights = true;
+      }
+
+      console.log('[DEBUG] Assembly AI transcription config:', JSON.stringify(transcriptionConfig, null, 2));
+      console.log('[DEBUG] Assembly AI URL:', this.transcriptUrl);
+      console.log('[DEBUG] Assembly AI headers:', this.axiosInstance.defaults.headers);
 
       const response = await this.axiosInstance.post(this.transcriptUrl, transcriptionConfig);
       return response.data;

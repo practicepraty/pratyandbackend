@@ -7,6 +7,8 @@ import { initializeRedis, checkRedisHealth, shutdownRedis } from './config/redis
 import { initializeRateLimiters } from './middlewares/rateLimiting.middleware.js';
 import { checkClamAVStatus } from './middlewares/malwareScanning.middleware.js';
 import { logAuditEvent, HIPAA_EVENTS } from './middlewares/hipaaAudit.middleware.js';
+import websocketService from './services/websocketService.js';
+import cacheService from './services/cacheService.js';
 import winston from 'winston';
 import fs from 'fs';
 import path from 'path';
@@ -146,6 +148,10 @@ const initializeSecurityServices = async () => {
     await initializeRateLimiters();
     logger.info('Rate limiters initialized');
     
+    // Initialize cache service
+    await cacheService.warmupCache();
+    logger.info('Cache service warmed up');
+    
     // Log system startup
     logAuditEvent(HIPAA_EVENTS.SYSTEM_ACCESS, {
       userId: 'system',
@@ -213,6 +219,10 @@ const startHTTPServer = async () => {
       httpServer.listen(serverPort, () => {
         logger.info(`HTTP Server running on port ${serverPort}`);
         logger.info(`Environment: ${config.env}`);
+        
+        // Initialize WebSocket service
+        websocketService.initialize(httpServer);
+        logger.info('WebSocket service initialized');
         
         // Log security summary
         const securitySummary = getSecuritySummary();

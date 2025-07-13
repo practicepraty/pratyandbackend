@@ -8,6 +8,8 @@ import cookieParser from "cookie-parser"
 import session from "express-session"
 import MongoStore from "connect-mongo"
 import { errorHandler } from "./middlewares/errorHandler.middleware.js";
+import { enhancedErrorHandler, notFoundHandler, timeoutHandler } from "./middlewares/enhancedErrorHandler.middleware.js";
+import loggingService from "./services/loggingService.js";
 import { handleMulterError } from "./middlewares/multer.middleware.js";
 import { 
   helmetConfig,
@@ -24,6 +26,14 @@ import { safeRedisOperation } from "./config/redis.config.js";
 import { fallbackGeneralRateLimit } from "./middlewares/fallbackRateLimit.middleware.js";
 import { auditLogger_middleware } from "./middlewares/audit.middleware.js";
 import { sanitizeInput } from "./middlewares/validation.middleware.js";
+import { 
+  requestDebugger, 
+  processingStatusDebugger, 
+  audioProcessingDebugger,
+  errorTracker,
+  healthCheckLogger,
+  performanceMonitor
+} from "./middlewares/debugLogging.middleware.js";
 import { csrfProtection, csrfErrorHandler, provideCsrfToken } from "./middlewares/csrf.middleware.js";
 import { xssProtection as enhancedXssProtection, contentSecurityPolicy, antiXssHeaders } from "./middlewares/xss.middleware.js";
 import { httpsRedirect, hsts, sslSecurityHeaders } from "./config/https.config.js";
@@ -89,13 +99,35 @@ app.use(session({
   rolling: true // Reset expiry on activity
 }));
 
-// CSRF protection middleware with bypass for development routes
+// CSRF protection middleware with bypass for API endpoints and development routes
 app.use((req, res, next) => {
   // Skip CSRF for development routes (when NODE_ENV is not production)
   if (process.env.NODE_ENV !== 'production' && req.path.includes('-dev')) {
     console.log('Skipping CSRF for development route:', req.path);
     return next();
   }
+  
+  // Skip CSRF for API endpoints that use JWT authentication
+  const apiExemptPaths = [
+    '/api/v1/processing/',
+    '/api/v1/users/login',
+    '/api/v1/users/register',
+    '/api/v1/users/logout',
+    '/api/v1/users/refresh',
+    '/api/v1/users/verify-email',
+    '/api/v1/users/reset-password',
+    '/api/v1/auth/login',
+    '/api/v1/auth/logout',
+    '/api/v1/auth/refresh',
+    '/api/v1/auth/verify-email',
+    '/api/v1/auth/reset-password'
+  ];
+  
+  if (apiExemptPaths.some(path => req.path.startsWith(path))) {
+    console.log('Skipping CSRF for API endpoint:', req.path);
+    return next();
+  }
+  
   return csrfProtection(req, res, next);
 });
 app.use(provideCsrfToken);
@@ -174,6 +206,11 @@ app.use(express.static("public", {
 }))
 app.use(cookieParser(process.env.COOKIE_SECRET))
 
+// Debug and monitoring middleware
+app.use(requestDebugger);
+app.use(healthCheckLogger);
+app.use(performanceMonitor);
+
 // Audit logging middleware
 app.use(auditLogger_middleware);
 
@@ -185,6 +222,7 @@ import websiteGenerationRouter from './routes/websiteGeneration.routes.js'
 import websiteRouter from './routes/websites.js'
 import websitePublishRouter from './routes/websitePublish.routes.js'
 import websiteVersionsRouter from './routes/websiteVersions.routes.js'
+import unifiedProcessingRouter from './routes/unifiedProcessing.routes.js'
 
 // Health check endpoint (no auth required)
 app.get('/health', (req, res) => {
@@ -218,10 +256,22 @@ app.use(csrfErrorHandler);
 // Multer error handler for file uploads
 app.use(handleMulterError);
 
+// Request timeout middleware with exceptions for audio processing
+app.use((req, res, next) => {
+  // Use longer timeout for audio processing endpoints
+  if (req.path.includes('/process-audio')) {
+    return timeoutHandler(120000)(req, res, next); // 2 minute timeout for audio
+  }
+  return timeoutHandler(30000)(req, res, next); // 30 second timeout for other requests
+});
+
 // Apply enhanced security checks to API routes
 app.use('/api/v1/*', (req, res, next) => {
   // Add request ID for tracking
   req.requestId = req.headers['x-request-id'] || crypto.randomUUID();
+  
+  // Add start time for performance tracking
+  req.startTime = Date.now();
   
   // Validate API version
   const apiVersion = req.headers['x-api-version'];
@@ -235,6 +285,27 @@ app.use('/api/v1/*', (req, res, next) => {
   next();
 });
 
+// Request logging middleware
+app.use('/api/v1/*', (req, res, next) => {
+  // Log request start
+  loggingService.logAppEvent('info', 'API Request Started', {
+    method: req.method,
+    url: req.originalUrl,
+    requestId: req.requestId,
+    userAgent: req.get('user-agent'),
+    ip: req.ip,
+    userId: req.user?._id
+  });
+
+  // Log response when finished
+  res.on('finish', () => {
+    const processingTime = Date.now() - req.startTime;
+    loggingService.logRequest(req, res, processingTime);
+  });
+
+  next();
+});
+
 // routes declaration
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/ai", aiRouter)
@@ -243,8 +314,12 @@ app.use("/api/v1/website-generation", websiteGenerationRouter)
 app.use("/api/v1/websites", websiteRouter)
 app.use("/api/v1/websites", websitePublishRouter)
 app.use("/api/v1/websites", websiteVersionsRouter)
+app.use("/api/v1/processing", processingStatusDebugger, audioProcessingDebugger, unifiedProcessingRouter)
 
-// 404 handler
+// 404 handler for API routes
+app.use('/api/*', notFoundHandler);
+
+// 404 handler for other routes
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
@@ -253,8 +328,11 @@ app.use('*', (req, res) => {
   });
 });
 
-// Global error handler (must be last)
-app.use(errorHandler);
+// Error tracking middleware (before enhanced error handler)
+app.use(errorTracker);
+
+// Enhanced error handler (must be last)
+app.use(enhancedErrorHandler);
 
 // Graceful shutdown handling
 process.on('SIGTERM', () => {
