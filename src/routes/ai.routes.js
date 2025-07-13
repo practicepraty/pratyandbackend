@@ -25,7 +25,7 @@ import {
 } from "../controllers/ai.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { singleAudioUpload, handleMulterError, validateAudioFile } from "../middlewares/multer.middleware.js";
-import rateLimiter, { aiRateLimiter, uploadRateLimiter } from "../middleware/rateLimit.js";
+import { rateLimiter, aiRateLimiter, uploadRateLimiter } from "../middleware/rateLimit.js";
 
 const router = express.Router();
 

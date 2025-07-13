@@ -317,19 +317,34 @@ export const multipleUpload = multer({
 
 // Clean, dedicated audio upload middleware without conflicts
 export const singleAudioUpload = (req, res, next) => {
+  console.log(`[MULTER DEBUG] Starting singleAudioUpload middleware`);
+  console.log(`[MULTER DEBUG] Request headers:`, req.headers);
+  console.log(`[MULTER DEBUG] Content-Type:`, req.headers['content-type']);
+  
   // Use the dedicated audio upload configuration directly
   audioUpload.single('audioFile')(req, res, (err) => {
     if (err) {
       console.error(`[MULTER ERROR] Audio upload failed:`, {
         message: err.message,
         code: err.code,
-        field: err.field
+        field: err.field,
+        limit: err.limit
       });
+      
+      // More specific error handling for file count limit
+      if (err.code === 'LIMIT_FILE_COUNT') {
+        console.error(`[MULTER ERROR] LIMIT_FILE_COUNT triggered - frontend sending too many files`);
+        console.error(`[MULTER ERROR] Expected: 1 file with field name 'audioFile'`);
+        console.error(`[MULTER ERROR] Check frontend form data for duplicate fields or multiple files`);
+      }
+      
       return next(err);
     }
     
     if (req.file) {
       console.log(`[MULTER] Audio file processed: ${req.file.originalname} (${req.file.size} bytes)`);
+    } else {
+      console.log(`[MULTER] No file received in request`);
     }
     
     next();
@@ -338,6 +353,63 @@ export const singleAudioUpload = (req, res, next) => {
 
 // Array of audio files upload middleware
 export const multipleAudioUpload = audioUpload.array('audioFiles', 3);
+
+// Flexible audio upload that accepts multiple possible field names
+export const flexibleAudioUpload = (req, res, next) => {
+  console.log(`[FLEXIBLE MULTER DEBUG] Starting flexibleAudioUpload middleware`);
+  
+  // Try common field names used by frontends
+  const fieldNames = ['audioFile', 'audio', 'file', 'upload'];
+  let currentAttempt = 0;
+  
+  const tryNextField = () => {
+    if (currentAttempt >= fieldNames.length) {
+      // If all field names failed, fall back to any field
+      console.log(`[FLEXIBLE MULTER] Trying any field upload`);
+      audioUpload.any()(req, res, (err) => {
+        if (err) {
+          console.error(`[FLEXIBLE MULTER ERROR] All attempts failed:`, err);
+          return next(err);
+        }
+        
+        // Check if we got any files
+        if (req.files && req.files.length > 0) {
+          // Take the first file and put it in req.file for compatibility
+          req.file = req.files[0];
+          console.log(`[FLEXIBLE MULTER] Found file in field: ${req.file.fieldname}`);
+        }
+        
+        next();
+      });
+      return;
+    }
+    
+    const fieldName = fieldNames[currentAttempt];
+    console.log(`[FLEXIBLE MULTER] Trying field name: ${fieldName}`);
+    
+    audioUpload.single(fieldName)(req, res, (err) => {
+      if (err && err.code === 'LIMIT_UNEXPECTED_FILE') {
+        // This field name didn't work, try the next one
+        currentAttempt++;
+        tryNextField();
+        return;
+      }
+      
+      if (err) {
+        console.error(`[FLEXIBLE MULTER ERROR] Upload failed with field ${fieldName}:`, err);
+        return next(err);
+      }
+      
+      if (req.file) {
+        console.log(`[FLEXIBLE MULTER] Successfully received file with field name: ${fieldName}`);
+      }
+      
+      next();
+    });
+  };
+  
+  tryNextField();
+};
 
 // Single image upload middleware  
 export const singleImageUpload = imageUpload.single('image');

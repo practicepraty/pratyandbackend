@@ -10,9 +10,9 @@ import {
   clearCache
 } from "../controllers/unifiedProcessing.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-import { singleAudioUpload, handleMulterError, validateAudioFile } from "../middlewares/multer.middleware.js";
+import { singleAudioUpload, flexibleAudioUpload, handleMulterError, validateAudioFile } from "../middlewares/multer.middleware.js";
 import { authLoggingMiddleware } from "../middlewares/authLogging.middleware.js";
-import rateLimiter, { aiRateLimiter, uploadRateLimiter } from "../middleware/rateLimit.js";
+import { rateLimiter, aiRateLimiter, uploadRateLimiter } from "../middleware/rateLimit.js";
 import { body, param, query, validationResult } from "express-validator";
 import { ApiError } from "../utils/apierror.js";
 
@@ -164,7 +164,7 @@ router.route("/process-text").post(
 router.route("/process-audio").post(
   verifyJWT,
   uploadRateLimiter.audio,
-  singleAudioUpload,
+  flexibleAudioUpload,
   handleMulterError,
   validateAudioFile,
   audioInputValidation,

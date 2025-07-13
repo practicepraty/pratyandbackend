@@ -168,9 +168,16 @@ export const decryptAuditData = (encryptedData) => {
       return encryptedData;
     }
     
-    const iv = Buffer.from(encryptedData.iv, 'hex');
-    const decipher = crypto.createDecipher('aes-256-cbc', AUDIT_ENCRYPTION_KEY.slice(0, 32));
+    if (!config.hipaa.encryptAtRest) {
+      return encryptedData;
+    }
     
+    const iv = Buffer.from(encryptedData.iv, 'hex');
+    const authTag = Buffer.from(encryptedData.authTag, 'hex');
+    const key = crypto.scryptSync(AUDIT_ENCRYPTION_KEY, 'salt', 32);
+    const decipher = crypto.createDecipherGCM('aes-256-gcm', key, iv);
+    
+    decipher.setAuthTag(authTag);
     let decrypted = decipher.update(encryptedData.data, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     
