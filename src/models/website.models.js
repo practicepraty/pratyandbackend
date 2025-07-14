@@ -43,7 +43,14 @@ const seoMetaSchema = new mongoose.Schema({
   description: {
     type: String,
     required: true,
-    maxlength: 160
+    maxlength: 200,
+    set: function(v) {
+      // Auto-truncate if too long but preserve readability
+      if (v && v.length > 160) {
+        return v.substring(0, 157) + '...';
+      }
+      return v;
+    }
   },
   keywords: [{
     type: String,
@@ -126,8 +133,15 @@ const serviceSchema = new mongoose.Schema({
 const contactInfoSchema = new mongoose.Schema({
   phone: {
     type: String,
-    required: true,
-    match: /^[\+]?[1-9][\d]{0,15}$/
+    required: false,
+    validate: {
+      validator: function(v) {
+        if (!v) return true; // Allow empty phone numbers
+        // Accept common phone formats: (555) 123-4567, 555-123-4567, +1-555-123-4567, etc.
+        return /^[\d\s\-\+\(\)\.x]+$/.test(v);
+      },
+      message: 'Phone number contains invalid characters'
+    }
   },
   email: {
     type: String,
@@ -282,6 +296,300 @@ const customizationSchema = new mongoose.Schema({
   }
 });
 
+// Content History Schema for undo/redo
+const contentHistorySchema = new mongoose.Schema({
+  timestamp: {
+    type: Date,
+    default: Date.now
+  },
+  changes: {
+    type: mongoose.Schema.Types.Mixed,
+    required: true
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  action: {
+    type: String,
+    enum: ['edit', 'regenerate', 'undo', 'redo', 'auto_save'],
+    default: 'edit'
+  },
+  sectionId: String,
+  fieldId: String,
+  previousValue: mongoose.Schema.Types.Mixed,
+  newValue: mongoose.Schema.Types.Mixed
+});
+
+// Auto-save Schema
+const autoSaveSchema = new mongoose.Schema({
+  content: {
+    type: mongoose.Schema.Types.Mixed,
+    required: true
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now
+  },
+  isAutoSave: {
+    type: Boolean,
+    default: true
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  }
+});
+
+// Image Schema for website images
+const imageSchema = new mongoose.Schema({
+  id: {
+    type: String,
+    required: true
+  },
+  filename: {
+    type: String,
+    required: true
+  },
+  originalName: {
+    type: String,
+    required: true
+  },
+  url: {
+    type: String,
+    required: true
+  },
+  thumbnailUrl: String,
+  size: {
+    type: Number,
+    required: true
+  },
+  mimeType: {
+    type: String,
+    required: true
+  },
+  uploadedAt: {
+    type: Date,
+    default: Date.now
+  },
+  optimized: {
+    type: Boolean,
+    default: false
+  },
+  crops: [{
+    name: String,
+    width: Number,
+    height: Number,
+    x: Number,
+    y: Number,
+    url: String
+  }],
+  alt: String,
+  caption: String
+});
+
+// Enhanced Content Section Schemas for Frontend Compatibility
+
+// Header Schema with editable fields
+const headerSchema = new mongoose.Schema({
+  logo: {
+    text: String,
+    image: String,
+    alt: String,
+    editable: { type: Boolean, default: true }
+  },
+  navigation: [{
+    text: String,
+    link: String,
+    editable: { type: Boolean, default: true },
+    order: Number
+  }]
+});
+
+// Enhanced Hero Section Schema
+const enhancedHeroSectionSchema = new mongoose.Schema({
+  title: {
+    text: String,
+    editable: { type: Boolean, default: true },
+    validation: {
+      maxLength: { type: Number, default: 200 },
+      required: { type: Boolean, default: true }
+    }
+  },
+  subtitle: {
+    text: String,
+    editable: { type: Boolean, default: true },
+    validation: {
+      maxLength: { type: Number, default: 300 }
+    }
+  },
+  cta: {
+    text: String,
+    link: String,
+    editable: { type: Boolean, default: true },
+    validation: {
+      maxLength: { type: Number, default: 50 }
+    }
+  },
+  backgroundImage: {
+    src: String,
+    alt: String,
+    editable: { type: Boolean, default: true }
+  },
+  backgroundColor: String
+});
+
+// Enhanced About Section Schema
+const enhancedAboutSectionSchema = new mongoose.Schema({
+  heading: {
+    text: String,
+    editable: { type: Boolean, default: true },
+    validation: {
+      maxLength: { type: Number, default: 100 },
+      required: { type: Boolean, default: true }
+    }
+  },
+  content: {
+    text: String,
+    editable: { type: Boolean, default: true },
+    type: { type: String, default: 'richtext' },
+    validation: {
+      maxLength: { type: Number, default: 2000 },
+      required: { type: Boolean, default: true }
+    }
+  },
+  image: {
+    src: String,
+    alt: String,
+    editable: { type: Boolean, default: true }
+  },
+  highlights: [{
+    text: String,
+    editable: { type: Boolean, default: true },
+    validation: {
+      maxLength: { type: Number, default: 100 }
+    }
+  }]
+});
+
+// Enhanced Service Schema with frontend compatibility
+const enhancedServiceSchema = new mongoose.Schema({
+  id: {
+    type: String,
+    required: true
+  },
+  name: {
+    text: String,
+    editable: { type: Boolean, default: true },
+    validation: {
+      maxLength: { type: Number, default: 100 },
+      required: { type: Boolean, default: true }
+    }
+  },
+  description: {
+    text: String,
+    editable: { type: Boolean, default: true },
+    type: { type: String, default: 'richtext' },
+    validation: {
+      maxLength: { type: Number, default: 500 },
+      required: { type: Boolean, default: true }
+    }
+  },
+  icon: {
+    type: String,
+    value: String
+  },
+  image: {
+    src: String,
+    alt: String,
+    editable: { type: Boolean, default: true }
+  },
+  price: {
+    value: Number,
+    currency: { type: String, default: 'USD' },
+    editable: { type: Boolean, default: true }
+  },
+  duration: {
+    text: String,
+    editable: { type: Boolean, default: true }
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  order: {
+    type: Number,
+    default: 0
+  }
+});
+
+// Enhanced Contact Schema
+const enhancedContactSchema = new mongoose.Schema({
+  heading: {
+    text: String,
+    editable: { type: Boolean, default: true },
+    validation: {
+      maxLength: { type: Number, default: 100 }
+    }
+  },
+  email: {
+    text: String,
+    editable: { type: Boolean, default: true },
+    validation: {
+      pattern: String,
+      required: { type: Boolean, default: true },
+      message: String
+    }
+  },
+  phone: {
+    text: String,
+    editable: { type: Boolean, default: true },
+    validation: {
+      pattern: String,
+      required: { type: Boolean, default: true },
+      message: String
+    }
+  },
+  address: {
+    text: String,
+    editable: { type: Boolean, default: true },
+    validation: {
+      maxLength: { type: Number, default: 200 },
+      required: { type: Boolean, default: true }
+    }
+  },
+  hours: [{
+    day: String,
+    time: String,
+    editable: { type: Boolean, default: true }
+  }],
+  socialMedia: {
+    facebook: String,
+    twitter: String,
+    instagram: String,
+    linkedin: String
+  }
+});
+
+// Footer Schema
+const footerSchema = new mongoose.Schema({
+  copyright: {
+    text: String,
+    editable: { type: Boolean, default: true },
+    validation: {
+      maxLength: { type: Number, default: 100 }
+    }
+  },
+  links: [{
+    text: String,
+    link: String,
+    editable: { type: Boolean, default: true },
+    order: Number
+  }]
+});
+
 // Main Website Schema
 const websiteSchema = new mongoose.Schema({
   // Basic Information
@@ -306,6 +614,16 @@ const websiteSchema = new mongoose.Schema({
       'general medicine'
     ],
     index: true
+  },
+  
+  // Enhanced Content Structure for Frontend
+  content: {
+    header: headerSchema,
+    hero: enhancedHeroSectionSchema,
+    about: enhancedAboutSectionSchema,
+    services: [enhancedServiceSchema],
+    contact: enhancedContactSchema,
+    footer: footerSchema
   },
   
   // Content Sections
@@ -385,6 +703,15 @@ const websiteSchema = new mongoose.Schema({
   
   // Content Variations
   contentVariations: [contentVariationSchema],
+  
+  // Content History for undo/redo functionality
+  contentHistory: [contentHistorySchema],
+  
+  // Auto-save data
+  autoSaveData: autoSaveSchema,
+  
+  // Image management
+  images: [imageSchema],
   
   // User and Status
   userId: {

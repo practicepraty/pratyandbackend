@@ -201,6 +201,10 @@ class WebSocketService {
     tracker.lastUpdate = Date.now();
     tracker.completedAt = Date.now();
     tracker.totalDuration = tracker.completedAt - tracker.startTime;
+    
+    // Store the result and websiteId in the tracker for later retrieval
+    tracker.result = result;
+    tracker.websiteId = result.websiteId;
 
     // Send completion notification
     const completionData = {

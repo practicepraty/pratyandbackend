@@ -4,6 +4,7 @@ import {
   processTextToWebsite,
   processAudioToWebsite,
   getProcessingStatus,
+  getProcessingResult,
   getUserProcessingJobs,
   cancelProcessingJob,
   getServiceStats,
@@ -179,6 +180,14 @@ router.route("/status/:requestId").get(
   requestIdValidation,
   handleValidationErrors,
   getProcessingStatus
+);
+
+router.route("/result/:requestId").get(
+  authLoggingMiddleware,
+  verifyJWT,
+  requestIdValidation,
+  handleValidationErrors,
+  getProcessingResult
 );
 
 router.route("/jobs").get(

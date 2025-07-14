@@ -120,7 +120,13 @@ app.use((req, res, next) => {
     '/api/v1/auth/logout',
     '/api/v1/auth/refresh',
     '/api/v1/auth/verify-email',
-    '/api/v1/auth/reset-password'
+    '/api/v1/auth/reset-password',
+    '/api/v1/content/regenerate',
+    '/api/v1/content/improve',
+    '/api/v1/content/optimize-seo',
+    '/api/v1/content/adjust-tone',
+    '/api/v1/websites/',
+    '/api/v1/images/'
   ];
   
   if (apiExemptPaths.some(path => req.path.startsWith(path))) {
@@ -147,13 +153,16 @@ app.use(cors({
             origin === 'http://localhost:5174' ||
             origin === 'http://127.0.0.1:5174' ||
             origin === 'http://localhost:5175' ||
-            origin === 'http://127.0.0.1:5175') {
+            origin === 'http://127.0.0.1:5175' ||
+            origin === 'http://localhost:5177' ||
+            origin === 'http://127.0.0.1:5177') {
           return callback(null, true);
         }
       }
       
-      // Get allowed origins from environment
-      const allowedOrigins = config.cors.origin.split(',')
+      // Get allowed origins from environment with fallback
+      const corsOrigins = config.cors?.origin || process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176,http://localhost:5177';
+      const allowedOrigins = corsOrigins.split(',')
         .map(o => o.trim())
         .filter(o => o && o !== '*'); // Remove empty and wildcard
       
@@ -223,6 +232,8 @@ import websiteRouter from './routes/websites.js'
 import websitePublishRouter from './routes/websitePublish.routes.js'
 import websiteVersionsRouter from './routes/websiteVersions.routes.js'
 import unifiedProcessingRouter from './routes/unifiedProcessing.routes.js'
+import contentRegenerationRouter from './routes/contentRegeneration.routes.js'
+import imageUploadRouter from './routes/imageUpload.routes.js'
 
 // Health check endpoint (no auth required)
 app.get('/health', (req, res) => {
@@ -315,6 +326,8 @@ app.use("/api/v1/websites", websiteRouter)
 app.use("/api/v1/websites", websitePublishRouter)
 app.use("/api/v1/websites", websiteVersionsRouter)
 app.use("/api/v1/processing", processingStatusDebugger, audioProcessingDebugger, unifiedProcessingRouter)
+app.use("/api/v1/content", contentRegenerationRouter)
+app.use("/api/v1/images", imageUploadRouter)
 
 // 404 handler for API routes
 app.use('/api/*', notFoundHandler);

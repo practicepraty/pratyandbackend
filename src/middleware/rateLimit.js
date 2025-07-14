@@ -65,6 +65,13 @@ export const rateLimiter = {
         'API rate limit exceeded. Please try again later.'
     ),
     
+    // File upload limits - for file operations
+    fileUpload: createRateLimiter(
+        15 * 60 * 1000, // 15 minutes
+        20, // 20 uploads per window
+        'Too many file uploads. Please wait before uploading more files.'
+    ),
+    
     // Lenient limits - for frequent operations like auto-save
     lenient: createRateLimiter(
         1 * 60 * 1000, // 1 minute

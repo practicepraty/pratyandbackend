@@ -34,6 +34,10 @@ const envSchema = joi.object({
   REDIS_DB: joi.number().default(0),
   REDIS_TLS: joi.boolean().default(false),
   
+  // CORS Configuration
+  CORS_ORIGIN: joi.string().default('http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176,http://localhost:5177'),
+  CORS_CREDENTIALS: joi.boolean().default(true),
+  
   // SSL/HTTPS Configuration
   HTTPS_ENABLED: joi.boolean().default(false),
   HTTPS_PORT: joi.number().default(443),

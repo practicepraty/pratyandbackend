@@ -447,6 +447,27 @@ class UnifiedProcessingService {
     return websocketService.getProgressTracker(requestId);
   }
 
+  // Get processing result for completed requests
+  getProcessingResult(requestId) {
+    const tracker = websocketService.getProgressTracker(requestId);
+    
+    if (!tracker) {
+      return null;
+    }
+
+    // Only return results for completed processing
+    if (tracker.status !== 'completed') {
+      return {
+        requestId: tracker.requestId || requestId,
+        status: tracker.status,
+        message: 'Processing not completed yet'
+      };
+    }
+
+    // Return the complete result data
+    return tracker.result || tracker;
+  }
+
   // Get user's active processing jobs
   getUserProcessingJobs(userId) {
     return websocketService.getUserProgressTrackers(userId);

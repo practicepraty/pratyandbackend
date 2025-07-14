@@ -418,7 +418,13 @@ const getProcessingStatus = asyncHandler(async (req, res) => {
       lastUpdate: lastUpdateISO,
       estimatedTimeRemaining: status.estimatedTimeRemaining || null,
       metadata: status.metadata || {},
-      elapsedTime: status.startTime ? (Date.now() - status.startTime) : 0
+      elapsedTime: status.startTime ? (Date.now() - status.startTime) : 0,
+      // Include result info when processing is completed
+      result: status.status === 'completed' ? {
+        websiteId: status.websiteId,
+        hasWebsiteData: !!status.websiteId,
+        resultAvailable: true
+      } : null
     };
 
     console.log(`[DEBUG] Returning status response for ${requestId}:`, response.status);
@@ -442,6 +448,70 @@ const getProcessingStatus = asyncHandler(async (req, res) => {
     } else {
       // Server errors - log and return generic message
       throw new ApiError(500, "Failed to retrieve processing status");
+    }
+  }
+});
+
+// Get processing result for a completed request
+const getProcessingResult = asyncHandler(async (req, res) => {
+  const { requestId } = req.params;
+
+  console.log(`[DEBUG] Processing result request for ID: ${requestId}`);
+  console.log(`[DEBUG] User ID: ${req.user?._id}`);
+
+  if (!requestId) {
+    throw new ApiError(400, "Request ID is required to get processing result.");
+  }
+
+  if (!requestId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    throw new ApiError(400, "Invalid request ID format. Please provide a valid UUID.");
+  }
+
+  try {
+    console.log(`[DEBUG] Fetching result from unifiedProcessingService for: ${requestId}`);
+    const result = unifiedProcessingService.getProcessingResult(requestId);
+    
+    console.log(`[DEBUG] Result:`, result ? 'Found' : 'Not found');
+
+    if (!result) {
+      throw new ApiError(404, "Processing result not found. The request may have expired or not completed yet.");
+    }
+
+    // Verify user ownership
+    if (req.user) {
+      const requestUserId = req.user._id ? req.user._id.toString() : req.user._id;
+      const resultUserId = result.userId ? result.userId.toString() : result.userId;
+      
+      const isAuthorized = logOwnershipCheck(resultUserId, requestUserId, 'processing_result');
+      
+      if (!isAuthorized) {
+        throw new ApiError(403, "Access denied. You don't have permission to view this processing result.");
+      }
+    }
+
+    // Check if processing is actually completed
+    if (result.status !== 'completed') {
+      throw new ApiError(400, `Processing not completed yet. Current status: ${result.status}`);
+    }
+
+    console.log(`[DEBUG] Returning result for ${requestId} with websiteId: ${result.websiteId}`);
+
+    return res.status(200).json(
+      new ApiResponse(200, result, "Processing result retrieved successfully")
+    );
+
+  } catch (error) {
+    console.error(`[ERROR] Get processing result error for ${requestId}:`, {
+      message: error.message,
+      stack: error.stack,
+      statusCode: error.statusCode,
+      userId: req.user?._id
+    });
+    
+    if (error.statusCode && error.statusCode < 500) {
+      throw error;
+    } else {
+      throw new ApiError(500, "Failed to retrieve processing result");
     }
   }
 });
@@ -633,6 +703,7 @@ export {
   processTextToWebsite,
   processAudioToWebsite,
   getProcessingStatus,
+  getProcessingResult,
   getUserProcessingJobs,
   cancelProcessingJob,
   getServiceStats,
