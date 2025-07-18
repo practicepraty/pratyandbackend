@@ -48,24 +48,30 @@ app.use(securityHeaders); // Custom security headers
 app.use(antiXssHeaders); // Anti-XSS headers
 app.use(contentSecurityPolicy); // Content Security Policy
 // Smart rate limiting with fallback
+// Enhanced app.js section with improved Redis handling
 app.use(async (req, res, next) => {
   try {
-    // Try Redis-based rate limiting first
-    const redisResult = await safeRedisOperation(
+    // Check Redis health before attempting operations
+    const redisHealthy = await safeRedisOperation(
       async (client) => {
-        // Use existing Redis rate limiting
-        return generalRateLimit(req, res, next);
+        await client.ping();
+        return true;
       },
-      null
+      false
     );
     
-    // If Redis failed, use fallback rate limiting
-    if (redisResult === null) {
-      console.log('Using fallback rate limiting (Redis unavailable)');
+    if (redisHealthy) {
+      // Use Redis-based rate limiting
+      return generalRateLimit(req, res, next);
+    } else {
+      // Use fallback rate limiting with reduced logging
+      if (Math.random() < 0.001) { // Log only 0.1% of the time to reduce spam
+        console.log('Using fallback rate limiting (Redis unavailable)');
+      }
       return fallbackGeneralRateLimit(req, res, next);
     }
   } catch (error) {
-    console.warn('Rate limiting error, using fallback:', error.message);
+    // Silent fallback to prevent log spam
     return fallbackGeneralRateLimit(req, res, next);
   }
 });
@@ -126,7 +132,10 @@ app.use((req, res, next) => {
     '/api/v1/content/optimize-seo',
     '/api/v1/content/adjust-tone',
     '/api/v1/websites/',
-    '/api/v1/images/'
+    '/api/v1/images/',
+    '/api/v1/test/',
+    '/api/v1/website-generation/',
+    '/health'
   ];
   
   if (apiExemptPaths.some(path => req.path.startsWith(path))) {
@@ -234,6 +243,8 @@ import websiteVersionsRouter from './routes/websiteVersions.routes.js'
 import unifiedProcessingRouter from './routes/unifiedProcessing.routes.js'
 import contentRegenerationRouter from './routes/contentRegeneration.routes.js'
 import imageUploadRouter from './routes/imageUpload.routes.js'
+import healthRouter from './routes/health.js'
+import testRouter from './routes/test.routes.js'
 
 // Health check endpoint (no auth required)
 app.get('/health', (req, res) => {
@@ -328,6 +339,8 @@ app.use("/api/v1/websites", websiteVersionsRouter)
 app.use("/api/v1/processing", processingStatusDebugger, audioProcessingDebugger, unifiedProcessingRouter)
 app.use("/api/v1/content", contentRegenerationRouter)
 app.use("/api/v1/images", imageUploadRouter)
+app.use("/api/health", healthRouter)
+app.use("/api/v1/test", testRouter)
 
 // 404 handler for API routes
 app.use('/api/*', notFoundHandler);

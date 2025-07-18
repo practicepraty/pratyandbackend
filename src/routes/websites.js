@@ -6,6 +6,7 @@ import { ApiError } from "../utils/apierror.js";
 import { ApiResponse } from "../utils/apirespose.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import websiteService from "../services/websiteService.js";
+import optimizedPreviewService from "../services/optimizedPreviewService.js";
 import { validateWebsiteUpdate } from "../middleware/validation.js";
 import rateLimiter from "../middleware/rateLimit.js";
 import { Website } from "../models/website.models.js";
@@ -392,19 +393,112 @@ router.put("/bulk/status", rateLimiter.moderate, asyncHandler(async (req, res) =
 // Get website preview (alias for preview-data for frontend compatibility)
 router.get('/:websiteId/preview', rateLimiter.standard, asyncHandler(async (req, res) => {
     const { websiteId } = req.params;
-    const { deviceType = 'desktop', zoom = 100 } = req.query;
+    const { deviceType = 'desktop', zoom = 100, forceRegenerate = false, format = 'json' } = req.query;
     
     try {
-        const previewData = await websiteService.getPreviewData(websiteId, req.user._id, {
+        const previewData = await optimizedPreviewService.generatePreview(websiteId, req.user._id, {
             deviceType,
-            zoom: parseInt(zoom)
+            zoom: parseInt(zoom),
+            forceRegenerate: forceRegenerate === 'true'
         });
         
+        // If format is 'html', return raw HTML for iframe
+        if (format === 'html') {
+            // Set proper headers for HTML content
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+            res.setHeader('Content-Security-Policy', "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://cdn.tailwindcss.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com;");
+            
+            // Inject CSS into HTML
+            const htmlWithCSS = previewData.html.replace(
+                '<style id="custom-styles">',
+                `<style id="custom-styles">${previewData.css}`
+            );
+            
+            return res.send(htmlWithCSS);
+        }
+        
+        // Default JSON response
         return res.status(200).json(
             new ApiResponse(200, previewData, "Website preview retrieved successfully")
         );
     } catch (error) {
+        if (format === 'html') {
+            // Return error page in HTML format
+            const errorHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Preview Error</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+        .error { color: #dc2626; background: #fef2f2; padding: 20px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="error">
+        <h1>Preview Error</h1>
+        <p>Unable to generate preview: ${error.message}</p>
+        <p>Please try refreshing the page or contact support if the issue persists.</p>
+    </div>
+</body>
+</html>`;
+            
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            return res.status(500).send(errorHtml);
+        }
         throw error;
+    }
+}));
+
+// Get raw HTML preview for iframe rendering
+router.get('/:websiteId/preview/html', rateLimiter.standard, asyncHandler(async (req, res) => {
+    const { websiteId } = req.params;
+    const { deviceType = 'desktop', zoom = 100, forceRegenerate = false } = req.query;
+    
+    try {
+        const previewData = await optimizedPreviewService.generatePreview(websiteId, req.user._id, {
+            deviceType,
+            zoom: parseInt(zoom),
+            forceRegenerate: forceRegenerate === 'true'
+        });
+        
+        // Set proper headers for HTML content
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+        res.setHeader('Content-Security-Policy', "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://cdn.tailwindcss.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com;");
+        
+        // Inject CSS into HTML
+        const htmlWithCSS = previewData.html.replace(
+            '<style id="custom-styles">',
+            `<style id="custom-styles">${previewData.css}`
+        );
+        
+        // Return raw HTML with CSS
+        return res.send(htmlWithCSS);
+    } catch (error) {
+        // Return error page in HTML format
+        const errorHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Preview Error</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+        .error { color: #dc2626; background: #fef2f2; padding: 20px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="error">
+        <h1>Preview Error</h1>
+        <p>Unable to generate preview: ${error.message}</p>
+        <p>Please try refreshing the page or contact support if the issue persists.</p>
+    </div>
+</body>
+</html>`;
+        
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        return res.status(500).send(errorHtml);
     }
 }));
 

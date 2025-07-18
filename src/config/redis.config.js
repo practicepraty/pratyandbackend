@@ -1,8 +1,8 @@
+// Enhanced Redis configuration with better fallback handling
 import Redis from 'ioredis';
 import winston from 'winston';
 import { config } from './environment.js';
 
-// Configure logger for Redis operations
 const logger = winston.createLogger({
   level: config.logging.level,
   format: winston.format.combine(
@@ -22,85 +22,67 @@ const logger = winston.createLogger({
   ]
 });
 
-// Redis configuration with security enhancements
+// Enhanced Redis configuration with better connection handling
 const redisConfig = {
-  host: config.redis.host,
-  port: config.redis.port,
-  password: config.redis.password,
-  db: config.redis.db,
+  host: config.redis.host || 'localhost',
+  port: config.redis.port || 6379,
+  password: config.redis.password || undefined,
+  db: config.redis.db || 0,
   
-  // Connection options
-  connectTimeout: 10000,
-  commandTimeout: 5000,
+  // Enhanced connection options
+  connectTimeout: 5000,
+  commandTimeout: 3000,
   retryDelayOnFailover: 100,
   enableReadyCheck: true,
-  maxRetriesPerRequest: 3,
+  maxRetriesPerRequest: 2,
   lazyConnect: true,
   keepAlive: 30000,
   
-  // Security options
-  tls: config.redis.tls ? {
-    rejectUnauthorized: true,
-    checkServerIdentity: () => undefined // Allow self-signed certificates in dev
-  } : undefined,
-  
-  // Connection pooling
-  family: 4,
-  
-  // Retry strategy
+  // Improved retry strategy
   retryStrategy: (times) => {
-    // Stop retrying after 3 attempts to avoid spam
-    if (times > 3) {
-      logger.info('Redis retry limit reached, switching to fallback mode');
+    if (times > 2) {
+      logger.warn('Redis retry limit reached, using fallback mode');
       return null;
     }
-    const delay = Math.min(times * 50, 2000);
-    logger.warn(`Redis connection retry attempt ${times}, delay: ${delay}ms`);
+    const delay = Math.min(times * 100, 1000);
+    logger.debug(`Redis connection retry attempt ${times}, delay: ${delay}ms`);
     return delay;
   },
   
-  // Reconnect on error
-  reconnectOnError: (err) => {
-    const targetError = 'READONLY';
-    return err.message.includes(targetError);
-  },
-  
   // Connection name for monitoring
-  connectionName: 'doctors-website-builder',
+  connectionName: 'website-builder',
   
-  // Enable automatic pipelining for better performance
-  enableAutoPipelining: true,
-  
-  // Maximum number of commands in the pipeline
-  maxPipeline: 10,
-  
-  // Keyspace notifications for monitoring
-  keyPrefix: 'dwb:',
-  
-  // Lua script caching
-  enableOfflineQueue: false,
+  // Enable offline queue for better reliability
+  enableOfflineQueue: true,
   
   // Connection monitoring
-  showFriendlyErrorStack: config.development.debug
+  showFriendlyErrorStack: config.env === 'development'
 };
 
-// Create Redis client instance
 let redisClient = null;
 let redisHealthy = false;
+let reconnectAttempts = 0;
+const maxReconnectAttempts = 3;
 
-// Initialize Redis connection with fallback
+// Initialize Redis with enhanced error handling
 export const initializeRedis = async () => {
   try {
     if (redisClient) {
-      await redisClient.disconnect();
+      try {
+        await redisClient.disconnect();
+      } catch (error) {
+        logger.debug('Error disconnecting existing Redis client:', error.message);
+      }
     }
     
+    // Create new Redis client
     redisClient = new Redis(redisConfig);
     
-    // Event listeners for connection monitoring
+    // Enhanced event listeners
     redisClient.on('connect', () => {
       logger.info('Redis connected successfully');
       redisHealthy = true;
+      reconnectAttempts = 0;
     });
     
     redisClient.on('ready', () => {
@@ -109,13 +91,20 @@ export const initializeRedis = async () => {
     });
     
     redisClient.on('error', (error) => {
-      logger.warn('Redis connection error (using fallback):', error.message);
+      logger.warn(`Redis error: ${error.message}`);
       redisHealthy = false;
-      // Don't throw here, allow graceful degradation
+      
+      // Don't throw, allow graceful degradation
+      if (reconnectAttempts < maxReconnectAttempts) {
+        reconnectAttempts++;
+        logger.info(`Attempting Redis reconnection (${reconnectAttempts}/${maxReconnectAttempts})`);
+      } else {
+        logger.warn('Max Redis reconnection attempts reached, using fallback mode');
+      }
     });
     
     redisClient.on('close', () => {
-      logger.warn('Redis connection closed');
+      logger.info('Redis connection closed');
       redisHealthy = false;
     });
     
@@ -124,65 +113,89 @@ export const initializeRedis = async () => {
     });
     
     redisClient.on('end', () => {
-      logger.warn('Redis connection ended');
+      logger.info('Redis connection ended');
       redisHealthy = false;
     });
     
-    // Test connection with timeout
-    const connectionPromise = redisClient.ping();
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Redis connection timeout')), 5000)
-    );
+    // Test connection with shorter timeout
+    try {
+      await Promise.race([
+        redisClient.ping(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Redis connection timeout')), 3000)
+        )
+      ]);
+      logger.info('Redis connection established and tested');
+      return redisClient;
+    } catch (error) {
+      logger.warn('Redis connection test failed, using fallback mode:', error.message);
+      redisHealthy = false;
+      return null;
+    }
     
-    await Promise.race([connectionPromise, timeoutPromise]);
-    logger.info('Redis connection established and tested');
-    
-    return redisClient;
   } catch (error) {
-    logger.warn('Redis initialization failed, will use fallback mechanisms:', error.message);
+    logger.warn('Redis initialization failed, using fallback mode:', error.message);
     redisHealthy = false;
     redisClient = null;
-    
-    // Return null to indicate fallback mode
     return null;
   }
 };
 
-// Get Redis client instance with fallback
-export const getRedisClient = () => {
-  if (!redisClient) {
-    // Only log this occasionally to reduce noise
-    if (Math.random() < 0.01) { // 1% chance to log
-      logger.info('Redis client not available, using memory fallback');
+// Enhanced Redis operation wrapper with circuit breaker pattern
+let circuitBreakerOpen = false;
+let circuitBreakerOpenTime = 0;
+const circuitBreakerTimeout = 30000; // 30 seconds
+
+export const safeRedisOperation = async (operation, fallback = null) => {
+  // Check circuit breaker
+  if (circuitBreakerOpen) {
+    const now = Date.now();
+    if (now - circuitBreakerOpenTime > circuitBreakerTimeout) {
+      circuitBreakerOpen = false;
+      logger.info('Circuit breaker reset, attempting Redis operations');
+    } else {
+      return fallback;
     }
+  }
+  
+  try {
+    const client = getRedisClient();
+    if (!client || !redisHealthy) {
+      return fallback;
+    }
+    
+    const result = await operation(client);
+    return result;
+  } catch (error) {
+    logger.debug('Redis operation failed:', error.message);
+    
+    // Open circuit breaker on consecutive failures
+    if (error.message.includes('ECONNREFUSED') || error.message.includes('timeout')) {
+      circuitBreakerOpen = true;
+      circuitBreakerOpenTime = Date.now();
+      logger.warn('Circuit breaker opened due to Redis failures');
+    }
+    
+    return fallback;
+  }
+};
+
+// Get Redis client with health check
+export const getRedisClient = () => {
+  if (!redisClient || !redisHealthy) {
     return null;
   }
   return redisClient;
 };
 
-// Safe Redis operation wrapper
-export const safeRedisOperation = async (operation, fallback = null) => {
-  try {
-    const client = getRedisClient();
-    if (!client) {
-      // Silent fallback - no need to log every time
-      return fallback;
-    }
-    
-    return await operation(client);
-  } catch (error) {
-    logger.debug('Redis operation failed, using fallback:', error.message);
-    return fallback;
-  }
-};
-
-// Check Redis health
+// Enhanced health check
 export const checkRedisHealth = async () => {
   try {
     if (!redisClient) {
       return {
-        status: 'disconnected',
-        message: 'Redis client not initialized'
+        status: 'unavailable',
+        message: 'Redis client not initialized',
+        healthy: false
       };
     }
     
@@ -190,134 +203,28 @@ export const checkRedisHealth = async () => {
     await redisClient.ping();
     const responseTime = Date.now() - start;
     
-    const info = await redisClient.info();
-    const memory = await redisClient.memory('usage');
-    
     return {
       status: 'healthy',
       responseTime,
-      memory,
-      info: info.split('\r\n').filter(line => 
-        line.includes('redis_version') || 
-        line.includes('connected_clients') || 
-        line.includes('used_memory_human') ||
-        line.includes('total_commands_processed')
-      ).join('\n'),
+      healthy: true,
+      circuitBreakerOpen,
+      reconnectAttempts,
       timestamp: new Date().toISOString()
     };
   } catch (error) {
-    logger.error('Redis health check failed:', error);
     return {
       status: 'unhealthy',
       error: error.message,
+      healthy: false,
+      circuitBreakerOpen,
+      reconnectAttempts,
       timestamp: new Date().toISOString()
     };
   }
 };
 
-// Redis connection pool for rate limiting
-export const createRedisPool = (poolSize = 10) => {
-  const pool = [];
-  
-  for (let i = 0; i < poolSize; i++) {
-    const client = new Redis({
-      ...redisConfig,
-      connectionName: `${redisConfig.connectionName}-pool-${i}`
-    });
-    
-    pool.push(client);
-  }
-  
-  return pool;
-};
-
-// Get Redis statistics
-export const getRedisStats = async () => {
-  try {
-    const client = getRedisClient();
-    const info = await client.info();
-    const dbSize = await client.dbsize();
-    const memory = await client.memory('usage');
-    
-    // Parse info string into object
-    const stats = {};
-    info.split('\r\n').forEach(line => {
-      const [key, value] = line.split(':');
-      if (key && value) {
-        stats[key] = value;
-      }
-    });
-    
-    return {
-      dbSize,
-      memory,
-      connectedClients: parseInt(stats.connected_clients) || 0,
-      totalCommandsProcessed: parseInt(stats.total_commands_processed) || 0,
-      usedMemory: stats.used_memory_human || '0B',
-      redisVersion: stats.redis_version || 'unknown',
-      uptime: parseInt(stats.uptime_in_seconds) || 0,
-      timestamp: new Date().toISOString()
-    };
-  } catch (error) {
-    logger.error('Failed to get Redis stats:', error);
-    return {
-      error: error.message,
-      timestamp: new Date().toISOString()
-    };
-  }
-};
-
-// Clean up expired keys
-export const cleanupExpiredKeys = async () => {
-  try {
-    const client = getRedisClient();
-    const keys = await client.keys('dwb:*');
-    
-    let cleanedCount = 0;
-    for (const key of keys) {
-      const ttl = await client.ttl(key);
-      if (ttl === -1) { // Key exists but has no expiry
-        // Set default expiry based on key type
-        if (key.includes('session')) {
-          await client.expire(key, 86400); // 24 hours for sessions
-        } else if (key.includes('rate_limit')) {
-          await client.expire(key, 3600); // 1 hour for rate limits
-        } else if (key.includes('cache')) {
-          await client.expire(key, 1800); // 30 minutes for cache
-        }
-        cleanedCount++;
-      }
-    }
-    
-    logger.info(`Redis cleanup completed: ${cleanedCount} keys processed`);
-    return { cleanedCount, totalKeys: keys.length };
-  } catch (error) {
-    logger.error('Redis cleanup failed:', error);
-    throw error;
-  }
-};
-
-// Redis monitoring middleware
-export const redisMonitoringMiddleware = (req, res, next) => {
-  // Track Redis operations for this request
-  const startTime = Date.now();
-  
-  res.on('finish', () => {
-    const duration = Date.now() - startTime;
-    
-    // Log slow requests
-    if (duration > 1000) {
-      logger.warn('Slow Redis operation detected', {
-        url: req.url,
-        method: req.method,
-        duration,
-        ip: req.ip
-      });
-    }
-  });
-  
-  next();
-};
+// Check if Redis is healthy
+export const isRedisHealthy = () => redisHealthy && !circuitBreakerOpen;
 
 // Graceful shutdown
 export const shutdownRedis = async () => {
@@ -334,49 +241,11 @@ export const shutdownRedis = async () => {
   }
 };
 
-// Redis security commands
-export const secureRedisCommands = async () => {
-  try {
-    const client = getRedisClient();
-    
-    // Disable dangerous commands in production
-    if (config.env === 'production') {
-      const dangerousCommands = [
-        'FLUSHDB', 'FLUSHALL', 'CONFIG', 'EVAL', 'EVALSHA',
-        'SCRIPT', 'SHUTDOWN', 'DEBUG', 'MONITOR'
-      ];
-      
-      for (const command of dangerousCommands) {
-        try {
-          await client.config('SET', `rename-command ${command}`, '');
-        } catch (error) {
-          // Some commands might already be disabled
-          logger.warn(`Could not disable Redis command ${command}:`, error.message);
-        }
-      }
-      
-      logger.info('Redis security commands configured');
-    }
-  } catch (error) {
-    logger.error('Failed to configure Redis security:', error);
-  }
-};
-
-// Export Redis configuration
-export const redisConnectionConfig = redisConfig;
-
-// Export health status
-export const isRedisHealthy = () => redisHealthy;
-
 export default {
   initializeRedis,
   getRedisClient,
   checkRedisHealth,
-  createRedisPool,
-  getRedisStats,
-  cleanupExpiredKeys,
-  redisMonitoringMiddleware,
-  shutdownRedis,
-  secureRedisCommands,
-  isRedisHealthy
+  safeRedisOperation,
+  isRedisHealthy,
+  shutdownRedis
 };

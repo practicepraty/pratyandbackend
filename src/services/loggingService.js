@@ -60,12 +60,11 @@ class LoggingService {
       ]
     });
 
-    // Add console transport for development
-    if (process.env.NODE_ENV !== 'production') {
-      this.loggers.app.add(new winston.transports.Console({
-        format: consoleFormat
-      }));
-    }
+    // Add console transport for development - always enabled for better debugging
+    this.loggers.app.add(new winston.transports.Console({
+      format: consoleFormat,
+      level: 'info'
+    }));
 
     // Audio processing logger
     this.loggers.audio = winston.createLogger({
@@ -76,6 +75,10 @@ class LoggingService {
           filename: path.join(logsDir, 'audio-processing.log'),
           maxsize: 5242880,
           maxFiles: 3
+        }),
+        new winston.transports.Console({
+          format: consoleFormat,
+          level: 'info'
         })
       ]
     });
@@ -89,6 +92,10 @@ class LoggingService {
           filename: path.join(logsDir, 'text-processing.log'),
           maxsize: 5242880,
           maxFiles: 3
+        }),
+        new winston.transports.Console({
+          format: consoleFormat,
+          level: 'info'
         })
       ]
     });
@@ -102,6 +109,10 @@ class LoggingService {
           filename: path.join(logsDir, 'ai-service.log'),
           maxsize: 5242880,
           maxFiles: 3
+        }),
+        new winston.transports.Console({
+          format: consoleFormat,
+          level: 'info'
         })
       ]
     });
@@ -160,6 +171,27 @@ class LoggingService {
       timestamp: new Date().toISOString(),
       type: 'app_event'
     });
+  }
+  
+  // Log website generation success
+  logWebsiteGenerationSuccess(message, meta = {}) {
+    const successMessage = `🎉 WEBSITE GENERATION SUCCESS: ${message}`;
+    this.loggers.app.info(successMessage, {
+      ...meta,
+      timestamp: new Date().toISOString(),
+      type: 'website_generation_success'
+    });
+    // Force console output for website generation success
+    console.log(successMessage);
+    if (meta.processingTime) {
+      console.log(`⏱️  Processing time: ${meta.processingTime}ms`);
+    }
+    if (meta.specialty) {
+      console.log(`🏥 Specialty detected: ${meta.specialty}`);
+    }
+    if (meta.templateName) {
+      console.log(`📄 Template applied: ${meta.templateName}`);
+    }
   }
 
   // Log audio processing events
@@ -235,6 +267,11 @@ class LoggingService {
 
     const level = res.statusCode >= 400 ? 'warn' : 'info';
     this.loggers.app[level](`${req.method} ${req.originalUrl} - ${res.statusCode}`, logData);
+    
+    // Always log successful website generation requests to console
+    if (req.originalUrl.includes('/website-generation') && res.statusCode === 200) {
+      console.log(`✅ SUCCESS: ${req.method} ${req.originalUrl} - ${res.statusCode} (${processingTime}ms)`);
+    }
   }
 
   // Log user authentication events

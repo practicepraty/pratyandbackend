@@ -385,7 +385,7 @@ export class ContentProcessor {
         // Validate title
         if (seoMeta.title && typeof seoMeta.title === 'string') {
             const title = this.sanitizeContent(seoMeta.title);
-            if (title.length >= 10 && title.length <= 60) {
+            if (title.length >= 10 && title.length <= 55) {
                 validated.title = title;
             }
         }

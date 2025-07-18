@@ -26,7 +26,7 @@ const envSchema = joi.object({
   // Redis Configuration
   REDIS_HOST: joi.string().default('localhost'),
   REDIS_PORT: joi.number().default(6379),
-  REDIS_PASSWORD: joi.string().when('NODE_ENV', {
+  REDIS_PASSWORD: joi.string().allow('').when('NODE_ENV', {
     is: 'production',
     then: joi.required(),
     otherwise: joi.optional()

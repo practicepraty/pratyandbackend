@@ -38,7 +38,14 @@ const seoMetaSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
-    maxlength: 60
+    maxlength: 60,
+    set: function(v) {
+      // Auto-truncate if too long but preserve readability
+      if (v && v.length > 55) {
+        return v.substring(0, 52) + '...';
+      }
+      return v;
+    }
   },
   description: {
     type: String,

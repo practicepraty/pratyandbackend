@@ -77,8 +77,8 @@ export const validateWebsiteUpdate = [
     body('seoMeta.title')
         .optional()
         .isString()
-        .isLength({ min: 1, max: 60 })
-        .withMessage('SEO title must be between 1 and 60 characters'),
+        .isLength({ min: 1, max: 55 })
+        .withMessage('SEO title must be between 1 and 55 characters'),
     
     body('seoMeta.description')
         .optional()
@@ -221,8 +221,8 @@ export const validateWebsiteCreation = [
     body('seoMeta.title')
         .notEmpty()
         .withMessage('SEO title is required')
-        .isLength({ min: 1, max: 60 })
-        .withMessage('SEO title must be between 1 and 60 characters'),
+        .isLength({ min: 1, max: 55 })
+        .withMessage('SEO title must be between 1 and 55 characters'),
     
     body('seoMeta.description')
         .notEmpty()

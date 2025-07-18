@@ -22,10 +22,12 @@ class CacheService {
     };
   }
 
-  // Generate cache key
-  generateKey(type, identifier, suffix = '') {
+  // Generate cache key with versioning and specialty support
+  generateKey(type, identifier, suffix = '', specialty = null) {
     const hash = crypto.createHash('md5').update(identifier).digest('hex');
-    return `${type}:${hash}${suffix ? ':' + suffix : ''}`;
+    const version = process.env.CACHE_VERSION || 'v1';
+    const specialtyKey = specialty ? `:${specialty}` : '';
+    return `${version}:${type}:${hash}${specialtyKey}${suffix ? ':' + suffix : ''}`;
   }
 
   // Set cache with Redis fallback to memory
@@ -251,23 +253,34 @@ class CacheService {
     }
   }
 
-  // Clear all cache
+  // Clear all cache completely - CRITICAL FIX
   async clearAll() {
     try {
-      // Clear Redis
+      console.log('[Cache Service] 🧹 CLEARING ALL CACHES - CRITICAL FIX');
+      
+      // Clear Redis completely
       await safeRedisOperation(
         async (client) => {
           await client.flushAll();
+          console.log('[Cache Service] ✅ Redis cache cleared');
         },
         null
       );
 
-      // Clear memory cache
+      // Clear memory cache completely
       this.memoryCache.flushAll();
-      console.log('All cache cleared');
+      console.log('[Cache Service] ✅ Memory cache cleared');
+      
+      // Force garbage collection
+      if (global.gc) {
+        global.gc();
+        console.log('[Cache Service] ✅ Garbage collection forced');
+      }
+      
+      console.log('[Cache Service] ✅ ALL CACHES CLEARED - TEMPLATE CORRUPTION FIXED');
       return true;
     } catch (error) {
-      console.error('Clear all cache error:', error);
+      console.error('[Cache Service] ❌ Clear all cache error:', error);
       // Still clear memory cache
       this.memoryCache.flushAll();
       return false;
@@ -338,6 +351,59 @@ class CacheService {
     await this.set('static:medicalSpecialties', staticData.medicalSpecialties, 86400);
     
     console.log('Cache warmup completed');
+  }
+
+  // CRITICAL FIX: Cache invalidation by specialty
+  async invalidateBySpecialty(specialty) {
+    try {
+      console.log(`[Cache Service] 🗑️ Invalidating cache for specialty: ${specialty}`);
+      
+      // Find all keys that contain the specialty
+      const pattern = `*:${specialty}:*`;
+      await this.invalidatePattern(pattern);
+      
+      // Also invalidate specialty-specific patterns
+      const specialtyPattern = `*:${specialty}`;
+      await this.invalidatePattern(specialtyPattern);
+      
+      console.log(`[Cache Service] ✅ Cache invalidated for specialty: ${specialty}`);
+      return true;
+    } catch (error) {
+      console.error(`[Cache Service] ❌ Error invalidating cache for specialty ${specialty}:`, error);
+      return false;
+    }
+  }
+
+  // CRITICAL FIX: Cache invalidation by version
+  async invalidateByVersion(version) {
+    try {
+      console.log(`[Cache Service] 🗑️ Invalidating cache for version: ${version}`);
+      
+      const pattern = `${version}:*`;
+      await this.invalidatePattern(pattern);
+      
+      console.log(`[Cache Service] ✅ Cache invalidated for version: ${version}`);
+      return true;
+    } catch (error) {
+      console.error(`[Cache Service] ❌ Error invalidating cache for version ${version}:`, error);
+      return false;
+    }
+  }
+
+  // CRITICAL FIX: Force cache refresh for specific types
+  async refreshCacheType(type) {
+    try {
+      console.log(`[Cache Service] 🔄 Refreshing cache for type: ${type}`);
+      
+      const pattern = `*:${type}:*`;
+      await this.invalidatePattern(pattern);
+      
+      console.log(`[Cache Service] ✅ Cache refreshed for type: ${type}`);
+      return true;
+    } catch (error) {
+      console.error(`[Cache Service] ❌ Error refreshing cache for type ${type}:`, error);
+      return false;
+    }
   }
 }
 

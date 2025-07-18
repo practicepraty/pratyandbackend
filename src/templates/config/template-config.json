@@ -6,13 +6,34 @@
     "dentistry",
     "dermatology",
     "cardiology",
-    "pediatrics"
+    "pediatrics",
+    "orthopedics",
+    "gynecology",
+    "neurology",
+    "psychiatry",
+    "oncology",
+    "ophthalmology",
+    "urology",
+    "endocrinology",
+    "radiology",
+    "pathology",
+    "emergency-medicine",
+    "surgery",
+    "anesthesiology",
+    "plastic-surgery",
+    "gastroenterology",
+    "pulmonology",
+    "rheumatology",
+    "nephrology"
   ],
   "templateMappings": {
     "general medicine": "general-practice",
     "family medicine": "general-practice",
     "primary care": "general-practice",
     "internal medicine": "general-practice",
+    "family practice": "general-practice",
+    "general practitioner": "general-practice",
+    "gp": "general-practice",
     "dentistry": "dentistry",
     "dental": "dentistry",
     "oral health": "dentistry",
@@ -26,8 +47,59 @@
     "cardiovascular": "cardiology",
     "pediatrics": "pediatrics",
     "pediatric": "pediatrics",
+    "paediatrics": "pediatrics",
+    "paediatric": "pediatrics",
     "children": "pediatrics",
-    "child health": "pediatrics"
+    "child health": "pediatrics",
+    "orthopedics": "orthopedics",
+    "orthopaedics": "orthopedics",
+    "bone": "orthopedics",
+    "joint": "orthopedics",
+    "gynecology": "gynecology",
+    "gynaecology": "gynecology",
+    "womens health": "gynecology",
+    "obstetrics": "gynecology",
+    "neurology": "neurology",
+    "neurological": "neurology",
+    "brain": "neurology",
+    "psychiatry": "psychiatry",
+    "mental health": "psychiatry",
+    "psychology": "psychiatry",
+    "oncology": "oncology",
+    "cancer": "oncology",
+    "ophthalmology": "ophthalmology",
+    "eye": "ophthalmology",
+    "vision": "ophthalmology",
+    "urology": "urology",
+    "urological": "urology",
+    "kidney": "urology",
+    "endocrinology": "endocrinology",
+    "diabetes": "endocrinology",
+    "hormone": "endocrinology",
+    "radiology": "radiology",
+    "imaging": "radiology",
+    "pathology": "pathology",
+    "laboratory": "pathology",
+    "emergency medicine": "emergency-medicine",
+    "emergency": "emergency-medicine",
+    "trauma": "emergency-medicine",
+    "surgery": "surgery",
+    "surgical": "surgery",
+    "anesthesiology": "anesthesiology",
+    "anaesthesiology": "anesthesiology",
+    "anesthesia": "anesthesiology",
+    "anaesthesia": "anesthesiology",
+    "plastic surgery": "plastic-surgery",
+    "cosmetic surgery": "plastic-surgery",
+    "gastroenterology": "gastroenterology",
+    "digestive": "gastroenterology",
+    "pulmonology": "pulmonology",
+    "respiratory": "pulmonology",
+    "lung": "pulmonology",
+    "rheumatology": "rheumatology",
+    "arthritis": "rheumatology",
+    "nephrology": "nephrology",
+    "renal": "nephrology"
   },
   "colorSchemes": {
     "general-practice": {
@@ -74,6 +146,78 @@
       "cardBackground": "#f3f4f6",
       "textColor": "#1f2937",
       "borderColor": "#e5e7eb"
+    },
+    "gynecology": {
+      "primary": "#be185d",
+      "secondary": "#64748b",
+      "accent": "#10b981",
+      "background": "#ffffff",
+      "cardBackground": "#fdf2f8",
+      "textColor": "#1f2937",
+      "borderColor": "#fbcfe8"
+    },
+    "orthopedics": {
+      "primary": "#059669",
+      "secondary": "#64748b",
+      "accent": "#d97706",
+      "background": "#ffffff",
+      "cardBackground": "#f0fdf4",
+      "textColor": "#1f2937",
+      "borderColor": "#dcfce7"
+    },
+    "neurology": {
+      "primary": "#7c3aed",
+      "secondary": "#64748b",
+      "accent": "#0ea5e9",
+      "background": "#ffffff",
+      "cardBackground": "#f5f3ff",
+      "textColor": "#1f2937",
+      "borderColor": "#e9d5ff"
+    },
+    "psychiatry": {
+      "primary": "#0891b2",
+      "secondary": "#64748b",
+      "accent": "#84cc16",
+      "background": "#ffffff",
+      "cardBackground": "#ecfeff",
+      "textColor": "#1f2937",
+      "borderColor": "#cffafe"
+    },
+    "oncology": {
+      "primary": "#9333ea",
+      "secondary": "#64748b",
+      "accent": "#f59e0b",
+      "background": "#ffffff",
+      "cardBackground": "#faf5ff",
+      "textColor": "#1f2937",
+      "borderColor": "#e9d5ff"
+    },
+    "ophthalmology": {
+      "primary": "#0d9488",
+      "secondary": "#64748b",
+      "accent": "#06b6d4",
+      "background": "#ffffff",
+      "cardBackground": "#f0fdfa",
+      "textColor": "#1f2937",
+      "borderColor": "#ccfbf1"
+    },
+    "urology": {
+      "primary": "#b45309",
+      "secondary": "#64748b",
+      "accent": "#0ea5e9",
+      "background": "#ffffff",
+      "cardBackground": "#fffbeb",
+      "textColor": "#1f2937",
+      "borderColor": "#fed7aa"
+    },
+    "endocrinology": {
+      "primary": "#7c2d12",
+      "secondary": "#64748b",
+      "accent": "#16a34a",
+      "background": "#ffffff",
+      "cardBackground": "#fef2f2",
+      "textColor": "#1f2937",
+      "borderColor": "#fecaca"
     }
   },
   "templateFeatures": {
@@ -126,33 +270,153 @@
       "customSections": ["age-groups", "vaccination", "resources", "environment"],
       "primaryCTA": "Schedule Visit",
       "secondaryCTA": "Our Services"
+    },
+    "gynecology": {
+      "showEmergencyBanner": false,
+      "showAppointments": true,
+      "showBlog": false,
+      "showTestimonials": true,
+      "showNewsletter": true,
+      "customSections": ["womens-health", "reproductive", "maternity"],
+      "primaryCTA": "Schedule Appointment",
+      "secondaryCTA": "Our Services"
+    },
+    "orthopedics": {
+      "showEmergencyBanner": false,
+      "showAppointments": true,
+      "showBlog": false,
+      "showTestimonials": true,
+      "showNewsletter": false,
+      "customSections": ["joint-care", "sports-medicine", "recovery"],
+      "primaryCTA": "Book Appointment",
+      "secondaryCTA": "Our Treatments"
+    },
+    "neurology": {
+      "showEmergencyBanner": true,
+      "showAppointments": true,
+      "showBlog": false,
+      "showTestimonials": true,
+      "showNewsletter": false,
+      "customSections": ["brain-health", "diagnostics", "conditions"],
+      "primaryCTA": "Schedule Consultation",
+      "secondaryCTA": "Neurological Services"
+    },
+    "psychiatry": {
+      "showEmergencyBanner": true,
+      "showAppointments": true,
+      "showBlog": true,
+      "showTestimonials": false,
+      "showNewsletter": true,
+      "customSections": ["mental-health", "therapy", "support"],
+      "primaryCTA": "Schedule Appointment",
+      "secondaryCTA": "Mental Health Services"
+    },
+    "oncology": {
+      "showEmergencyBanner": true,
+      "showAppointments": true,
+      "showBlog": true,
+      "showTestimonials": true,
+      "showNewsletter": true,
+      "customSections": ["cancer-care", "treatments", "support"],
+      "primaryCTA": "Schedule Consultation",
+      "secondaryCTA": "Cancer Services"
+    },
+    "ophthalmology": {
+      "showEmergencyBanner": false,
+      "showAppointments": true,
+      "showBlog": false,
+      "showTestimonials": true,
+      "showNewsletter": false,
+      "customSections": ["eye-care", "vision", "surgical"],
+      "primaryCTA": "Schedule Eye Exam",
+      "secondaryCTA": "Eye Care Services"
+    },
+    "urology": {
+      "showEmergencyBanner": false,
+      "showAppointments": true,
+      "showBlog": false,
+      "showTestimonials": true,
+      "showNewsletter": false,
+      "customSections": ["urological", "procedures", "mens-health"],
+      "primaryCTA": "Schedule Consultation",
+      "secondaryCTA": "Urological Services"
+    },
+    "endocrinology": {
+      "showEmergencyBanner": false,
+      "showAppointments": true,
+      "showBlog": true,
+      "showTestimonials": true,
+      "showNewsletter": true,
+      "customSections": ["diabetes", "hormones", "metabolism"],
+      "primaryCTA": "Schedule Appointment",
+      "secondaryCTA": "Endocrine Services"
     }
   },
   "seoDefaults": {
     "general-practice": {
-      "titleSuffix": "Family Medicine & Primary Care",
+      "titleSuffix": "Family Medicine",
       "metaKeywords": ["family medicine", "primary care", "healthcare", "medical center", "physician"],
       "description": "Comprehensive family medicine and primary care services for patients of all ages."
     },
     "dentistry": {
-      "titleSuffix": "Dental Care & Oral Health",
+      "titleSuffix": "Dental Care",
       "metaKeywords": ["dentistry", "dental care", "oral health", "teeth cleaning", "dentist"],
       "description": "Professional dental care services including general dentistry, cosmetic treatments, and oral health maintenance."
     },
     "dermatology": {
-      "titleSuffix": "Dermatology & Skin Care",
+      "titleSuffix": "Dermatology",
       "metaKeywords": ["dermatology", "skin care", "dermatologist", "skin cancer screening", "cosmetic dermatology"],
       "description": "Expert dermatology services including medical and cosmetic treatments for healthy, beautiful skin."
     },
     "cardiology": {
-      "titleSuffix": "Cardiology & Heart Care",
+      "titleSuffix": "Cardiology",
       "metaKeywords": ["cardiology", "heart care", "cardiologist", "cardiac services", "heart health"],
       "description": "Comprehensive cardiology services including heart disease prevention, diagnosis, and treatment."
     },
     "pediatrics": {
-      "titleSuffix": "Pediatric Care & Child Health",
+      "titleSuffix": "Pediatric Care",
       "metaKeywords": ["pediatrics", "child healthcare", "pediatrician", "children's health", "vaccinations"],
       "description": "Compassionate pediatric care for children from birth through adolescence in a child-friendly environment."
+    },
+    "gynecology": {
+      "titleSuffix": "Women's Health",
+      "metaKeywords": ["gynecology", "women's health", "gynecologist", "reproductive health", "prenatal care"],
+      "description": "Comprehensive women's healthcare services including gynecological care, prenatal services, and reproductive health."
+    },
+    "orthopedics": {
+      "titleSuffix": "Orthopedic Care",
+      "metaKeywords": ["orthopedics", "joint replacement", "sports medicine", "bone care", "orthopedic surgeon"],
+      "description": "Expert orthopedic care including joint replacement, sports medicine, and comprehensive bone and joint treatments."
+    },
+    "neurology": {
+      "titleSuffix": "Neurological Care",
+      "metaKeywords": ["neurology", "neurologist", "brain health", "stroke treatment", "epilepsy", "headache"],
+      "description": "Comprehensive neurological care for brain, spine, and nervous system disorders with advanced diagnostics."
+    },
+    "psychiatry": {
+      "titleSuffix": "Mental Health",
+      "metaKeywords": ["psychiatry", "mental health", "therapy", "counseling", "depression", "anxiety"],
+      "description": "Professional mental health services including psychiatric evaluations, therapy, and medication management."
+    },
+    "oncology": {
+      "titleSuffix": "Cancer Care",
+      "metaKeywords": ["oncology", "cancer treatment", "chemotherapy", "radiation therapy", "cancer care"],
+      "description": "Comprehensive cancer care with advanced treatments, chemotherapy, radiation, and supportive services."
+    },
+    "ophthalmology": {
+      "titleSuffix": "Eye Care",
+      "metaKeywords": ["ophthalmology", "eye care", "vision", "cataract surgery", "glaucoma", "LASIK"],
+      "description": "Expert eye care services including comprehensive exams, cataract surgery, glaucoma treatment, and vision correction."
+    },
+    "urology": {
+      "titleSuffix": "Urological Care",
+      "metaKeywords": ["urology", "urologist", "kidney stones", "prostate", "bladder", "male health"],
+      "description": "Comprehensive urological care including kidney stone treatment, prostate care, and bladder disorders."
+    },
+    "endocrinology": {
+      "titleSuffix": "Endocrine Care",
+      "metaKeywords": ["endocrinology", "diabetes", "thyroid", "hormone therapy", "metabolic disorders"],
+      "description": "Expert endocrine care including diabetes management, thyroid treatment, and hormone therapy services."
     }
   },
   "fallbackContent": {

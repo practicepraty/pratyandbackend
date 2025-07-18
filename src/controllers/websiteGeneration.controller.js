@@ -4,6 +4,7 @@ import { ApiError } from "../utils/apierror.js";
 import { ApiResponse } from "../utils/apirespose.js";
 import WebsiteGenerator from "../services/websiteGenerator.js";
 import { Website, GenerationHistory } from "../models/website.models.js";
+import loggingService from "../services/loggingService.js";
 
 // Main website generation endpoint
 const generateWebsite = asyncHandler(async (req, res) => {
@@ -44,12 +45,39 @@ const generateWebsite = asyncHandler(async (req, res) => {
             });
         }
 
+        // Log successful website generation with detailed information
+        loggingService.logWebsiteGenerationSuccess(
+            `Website generated successfully for ${result.specialtyInfo?.specialty || 'unknown'} specialty`,
+            {
+                websiteId: result.websiteId,
+                userId: req.user?._id,
+                specialty: result.specialtyInfo?.specialty,
+                templateName: result.websiteData?.metadata?.templateName,
+                processingTime: result.websiteData?.metadata?.processingTime,
+                qualityScore: result.websiteData?.metadata?.qualityScore,
+                hasPreview: !!result.websiteData?.previewUrl,
+                method: req.method,
+                url: req.originalUrl
+            }
+        );
+
         return res.status(200).json(
             new ApiResponse(200, result, "Website generated successfully")
         );
 
     } catch (error) {
         console.error("Website generation error:", error);
+        
+        // Log generation failure
+        loggingService.logError(error, {
+            operation: 'website_generation',
+            userId: req.user?._id,
+            specialty: specialty,
+            transcribedContentLength: transcribedContent?.length || 0,
+            method: req.method,
+            url: req.originalUrl
+        });
+        
         throw new ApiError(500, `Website generation failed: ${error.message}`);
     }
 });
@@ -88,6 +116,21 @@ const generateWebsitePreview = asyncHandler(async (req, res) => {
 
         const result = await WebsiteGenerator.generateWebsite(generationOptions);
 
+        // Log successful preview generation
+        loggingService.logWebsiteGenerationSuccess(
+            `Website preview generated successfully for ${website.specialty || 'unknown'} specialty`,
+            {
+                websiteId: websiteId,
+                userId: req.user._id,
+                specialty: website.specialty,
+                templateName: result.websiteData?.metadata?.templateName,
+                processingTime: result.websiteData?.metadata?.processingTime,
+                operation: 'preview_generation',
+                method: req.method,
+                url: req.originalUrl
+            }
+        );
+
         return res.status(200).json(
             new ApiResponse(200, {
                 html: result.websiteData.html,
@@ -100,6 +143,16 @@ const generateWebsitePreview = asyncHandler(async (req, res) => {
 
     } catch (error) {
         console.error("Preview generation error:", error);
+        
+        // Log preview generation failure
+        loggingService.logError(error, {
+            operation: 'preview_generation',
+            websiteId: websiteId,
+            userId: req.user?._id,
+            method: req.method,
+            url: req.originalUrl
+        });
+        
         throw new ApiError(500, `Preview generation failed: ${error.message}`);
     }
 });
@@ -121,6 +174,15 @@ const getWebsitePreview = asyncHandler(async (req, res) => {
 
         // Return the generated HTML as preview
         if (website.generatedHtml) {
+            // Log successful preview retrieval
+            loggingService.logAppEvent('info', 'Website preview retrieved successfully', {
+                websiteId: websiteId,
+                userId: req.user._id,
+                operation: 'preview_retrieval',
+                method: req.method,
+                url: req.originalUrl
+            });
+            
             res.setHeader('Content-Type', 'text/html');
             return res.send(website.generatedHtml);
         } else {
@@ -129,6 +191,16 @@ const getWebsitePreview = asyncHandler(async (req, res) => {
 
     } catch (error) {
         console.error("Preview retrieval error:", error);
+        
+        // Log preview retrieval failure
+        loggingService.logError(error, {
+            operation: 'preview_retrieval',
+            websiteId: websiteId,
+            userId: req.user?._id,
+            method: req.method,
+            url: req.originalUrl
+        });
+        
         throw new ApiError(500, `Failed to retrieve preview: ${error.message}`);
     }
 });
@@ -162,12 +234,35 @@ const updateWebsiteCustomization = asyncHandler(async (req, res) => {
             }
         });
 
+        // Log successful customization update
+        loggingService.logWebsiteGenerationSuccess(
+            `Website customizations updated successfully`,
+            {
+                websiteId: websiteId,
+                userId: req.user._id,
+                operation: 'customization_update',
+                customizationKeys: Object.keys(customizations),
+                method: req.method,
+                url: req.originalUrl
+            }
+        );
+
         return res.status(200).json(
             new ApiResponse(200, result, "Website customizations updated successfully")
         );
 
     } catch (error) {
         console.error("Customization update error:", error);
+        
+        // Log customization update failure
+        loggingService.logError(error, {
+            operation: 'customization_update',
+            websiteId: websiteId,
+            userId: req.user?._id,
+            method: req.method,
+            url: req.originalUrl
+        });
+        
         throw new ApiError(500, `Failed to update customizations: ${error.message}`);
     }
 });
@@ -203,12 +298,36 @@ const regenerateWebsiteSection = asyncHandler(async (req, res) => {
             }
         });
 
+        // Log successful section regeneration
+        loggingService.logWebsiteGenerationSuccess(
+            `${section} regenerated successfully`,
+            {
+                websiteId: websiteId,
+                userId: req.user._id,
+                section: section,
+                operation: 'section_regeneration',
+                method: req.method,
+                url: req.originalUrl
+            }
+        );
+
         return res.status(200).json(
             new ApiResponse(200, result, `${section} regenerated successfully`)
         );
 
     } catch (error) {
         console.error("Section regeneration error:", error);
+        
+        // Log section regeneration failure
+        loggingService.logError(error, {
+            operation: 'section_regeneration',
+            websiteId: websiteId,
+            section: section,
+            userId: req.user?._id,
+            method: req.method,
+            url: req.originalUrl
+        });
+        
         throw new ApiError(500, `Failed to regenerate ${section}: ${error.message}`);
     }
 });
@@ -272,6 +391,17 @@ const exportWebsiteData = asyncHandler(async (req, res) => {
 
     } catch (error) {
         console.error("Export error:", error);
+        
+        // Log export failure
+        loggingService.logError(error, {
+            operation: 'website_export',
+            websiteId: websiteId,
+            format: format,
+            userId: req.user?._id,
+            method: req.method,
+            url: req.originalUrl
+        });
+        
         throw new ApiError(500, `Failed to export website: ${error.message}`);
     }
 });
@@ -343,6 +473,16 @@ const validateWebsiteData = asyncHandler(async (req, res) => {
 
     } catch (error) {
         console.error("Validation error:", error);
+        
+        // Log validation failure
+        loggingService.logError(error, {
+            operation: 'website_validation',
+            websiteId: websiteId,
+            userId: req.user?._id,
+            method: req.method,
+            url: req.originalUrl
+        });
+        
         throw new ApiError(500, `Validation failed: ${error.message}`);
     }
 });
@@ -390,6 +530,16 @@ const getWebsiteGenerationHistory = asyncHandler(async (req, res) => {
 
     } catch (error) {
         console.error("History retrieval error:", error);
+        
+        // Log history retrieval failure
+        loggingService.logError(error, {
+            operation: 'history_retrieval',
+            websiteId: websiteId,
+            userId: req.user?._id,
+            method: req.method,
+            url: req.originalUrl
+        });
+        
         throw new ApiError(500, `Failed to retrieve history: ${error.message}`);
     }
 });
@@ -443,6 +593,20 @@ const duplicateWebsite = asyncHandler(async (req, res) => {
             }
         });
 
+        // Log successful website duplication
+        loggingService.logWebsiteGenerationSuccess(
+            `Website duplicated successfully`,
+            {
+                originalWebsiteId: websiteId,
+                newWebsiteId: duplicatedWebsite._id,
+                userId: req.user._id,
+                newTitle: duplicatedWebsite.websiteTitle,
+                operation: 'website_duplication',
+                method: req.method,
+                url: req.originalUrl
+            }
+        );
+
         return res.status(201).json(
             new ApiResponse(201, {
                 websiteId: duplicatedWebsite._id,
@@ -453,6 +617,16 @@ const duplicateWebsite = asyncHandler(async (req, res) => {
 
     } catch (error) {
         console.error("Duplication error:", error);
+        
+        // Log duplication failure
+        loggingService.logError(error, {
+            operation: 'website_duplication',
+            originalWebsiteId: websiteId,
+            userId: req.user?._id,
+            method: req.method,
+            url: req.originalUrl
+        });
+        
         throw new ApiError(500, `Failed to duplicate website: ${error.message}`);
     }
 });
@@ -521,6 +695,16 @@ const getWebsiteStats = asyncHandler(async (req, res) => {
 
     } catch (error) {
         console.error("Stats retrieval error:", error);
+        
+        // Log stats retrieval failure
+        loggingService.logError(error, {
+            operation: 'stats_retrieval',
+            websiteId: websiteId,
+            userId: req.user?._id,
+            method: req.method,
+            url: req.originalUrl
+        });
+        
         throw new ApiError(500, `Failed to retrieve statistics: ${error.message}`);
     }
 });

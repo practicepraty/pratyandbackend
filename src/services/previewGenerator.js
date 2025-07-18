@@ -877,16 +877,28 @@ header {
         return recommendations;
     }
 
-    // Clear preview cache
+    // Clear preview cache completely
     clearCache() {
+        console.log('[Preview Generator] 🧹 Clearing preview cache');
         this.previewCache.clear();
+        
+        // CRITICAL FIX: Force garbage collection
+        if (global.gc) {
+            global.gc();
+        }
+        
+        console.log('[Preview Generator] ✅ Preview cache cleared');
     }
 
-    // Get cache statistics
+    // Get cache statistics with detailed breakdown
     getCacheStats() {
+        const entries = [...this.previewCache.entries()];
+        
         return {
             size: this.previewCache.size,
-            memoryUsage: JSON.stringify([...this.previewCache.entries()]).length
+            memoryUsage: JSON.stringify(entries).length,
+            cacheKeys: entries.map(([key]) => key),
+            avgValueSize: entries.length > 0 ? entries.reduce((sum, [key, value]) => sum + JSON.stringify(value).length, 0) / entries.length : 0
         };
     }
 }

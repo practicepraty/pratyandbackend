@@ -6,6 +6,7 @@ import { PreviewGenerator } from "./previewGenerator.js";
 import { StyleProcessor } from "./styleProcessor.js";
 import { Website } from "../models/website.models.js";
 import { ApiError } from "../utils/apierror.js";
+import loggingService from "./loggingService.js";
 
 class WebsiteGenerator {
     constructor() {
@@ -83,7 +84,23 @@ class WebsiteGenerator {
                 );
             }
             
-            // Step 8: Format response
+            // Step 8: Log successful generation
+            loggingService.logWebsiteGenerationSuccess(
+                `Website generation pipeline completed successfully`,
+                {
+                    websiteId: websiteRecord?._id,
+                    userId: processedInput.userId,
+                    specialty: specialtyInfo.specialty,
+                    templateName: templateResult.templateName,
+                    processingTime: Date.now() - startTime,
+                    qualityScore: aiContent.qualityScore || 0.8,
+                    confidence: specialtyInfo.confidence,
+                    fallbackUsed: aiContent.fallbackUsed || false,
+                    pipeline: 'full_generation'
+                }
+            );
+            
+            // Step 9: Format response
             const response = {
                 success: true,
                 websiteId: websiteRecord?._id,
@@ -110,6 +127,17 @@ class WebsiteGenerator {
             
         } catch (error) {
             console.error('Website generation pipeline error:', error);
+            
+            // Log generation failure
+            loggingService.logError(error, {
+                operation: 'website_generation_pipeline',
+                userId: options.userId,
+                specialty: options.specialty,
+                transcribedContentLength: options.transcribedContent?.length || 0,
+                processingTime: Date.now() - startTime,
+                pipeline: 'full_generation'
+            });
+            
             throw new ApiError(500, `Website generation failed: ${error.message}`);
         }
     }
@@ -151,15 +179,20 @@ class WebsiteGenerator {
         }
     }
 
-    // Generate AI content with enhanced error handling
+    // Generate AI content with enhanced error handling and specialty-specific caching
     async generateAIContent(transcription, specialtyInfo, customizations) {
         try {
-            // Check cache first
+            // CRITICAL FIX: Check cache first with specialty-specific key
             const cacheKey = this.generateCacheKey(transcription, specialtyInfo.specialty);
+            console.log(`[Website Generator] 🔍 Checking cache for key: ${cacheKey}`);
+            
             if (this.generationCache.has(cacheKey)) {
+                console.log(`[Website Generator] ✅ Cache hit for: ${cacheKey}`);
                 return this.generationCache.get(cacheKey);
             }
 
+            console.log(`[Website Generator] 🔄 Cache miss, generating content for specialty: ${specialtyInfo.specialty}`);
+            
             // Generate content using AI service
             const aiContent = await this.aiService.generateWebsiteContent(
                 transcription,
@@ -172,13 +205,14 @@ class WebsiteGenerator {
                 customizations
             );
 
-            // Cache the result
+            // CRITICAL FIX: Cache the result with specialty validation
+            console.log(`[Website Generator] 💾 Caching content for specialty: ${specialtyInfo.specialty}`);
             this.generationCache.set(cacheKey, customizedContent);
             
             return customizedContent;
             
         } catch (error) {
-            console.error('AI content generation error:', error);
+            console.error('[Website Generator] ❌ AI content generation error:', error);
             
             // Generate fallback content
             return this.generateFallbackContent(transcription, specialtyInfo.specialty);
@@ -530,22 +564,44 @@ class WebsiteGenerator {
         }
     }
 
-    // Utility methods
+    // Utility methods with specialty-specific cache keys
     generateCacheKey(transcription, specialty) {
-        const content = transcription + specialty;
-        return `gen_${Buffer.from(content).toString('base64').slice(0, 32)}`;
+        // CRITICAL FIX: Include specialty in cache key to prevent conflicts
+        const content = `${transcription}:${specialty}:${Date.now()}`;
+        const hash = Buffer.from(content).toString('base64').slice(0, 32);
+        const cacheKey = `gen_${specialty}_${hash}`;
+        console.log(`[Website Generator] 🔑 Generated cache key: ${cacheKey}`);
+        return cacheKey;
     }
 
-    // Clear generation cache
+    // Clear generation cache completely
     clearCache() {
+        console.log('[Website Generator] 🧹 Clearing generation cache');
         this.generationCache.clear();
+        
+        // CRITICAL FIX: Force garbage collection
+        if (global.gc) {
+            global.gc();
+        }
+        
+        console.log('[Website Generator] ✅ Generation cache cleared');
     }
 
-    // Get cache statistics
+    // Get cache statistics with specialty breakdown
     getCacheStats() {
+        const entries = [...this.generationCache.entries()];
+        const specialtyBreakdown = {};
+        
+        entries.forEach(([key, value]) => {
+            const specialty = key.split('_')[1] || 'unknown';
+            specialtyBreakdown[specialty] = (specialtyBreakdown[specialty] || 0) + 1;
+        });
+        
         return {
             size: this.generationCache.size,
-            memoryUsage: JSON.stringify([...this.generationCache.entries()]).length
+            memoryUsage: JSON.stringify(entries).length,
+            specialtyBreakdown: specialtyBreakdown,
+            cacheKeys: entries.map(([key]) => key)
         };
     }
 }

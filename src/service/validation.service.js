@@ -176,8 +176,8 @@ class ValidationService {
     
     // SEO meta validation
     if (content.seoMeta) {
-      if (!content.seoMeta.title || content.seoMeta.title.length < 10 || content.seoMeta.title.length > 60) {
-        errors.push("SEO title is required and must be between 10-60 characters");
+      if (!content.seoMeta.title || content.seoMeta.title.length < 10 || content.seoMeta.title.length > 55) {
+        errors.push("SEO title is required and must be between 10-55 characters");
       }
       
       if (!content.seoMeta.description || content.seoMeta.description.length < 50 || content.seoMeta.description.length > 160) {

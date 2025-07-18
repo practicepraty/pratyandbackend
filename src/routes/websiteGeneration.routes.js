@@ -19,6 +19,9 @@ const router = express.Router();
 // Primary website generation endpoint
 router.route("/generate-website").post(verifyJWT, generateWebsite);
 
+// Test endpoint without authentication for debugging
+router.route("/generate").post(generateWebsite);
+
 // Website preview and customization
 router.route("/websites/:websiteId/preview").get(verifyJWT, getWebsitePreview);
 router.route("/websites/:websiteId/preview").post(verifyJWT, generateWebsitePreview);
